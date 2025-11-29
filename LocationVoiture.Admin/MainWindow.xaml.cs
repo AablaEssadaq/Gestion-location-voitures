@@ -1,33 +1,53 @@
-﻿using LocationVoiture.Data;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using LocationVoiture.Data; // Pour utiliser DatabaseHelper
+using System.Data;          // Pour utiliser DataTable
+
+
+
 
 namespace LocationVoiture.Admin
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        DatabaseHelper db = new DatabaseHelper();
+        private DatabaseHelper db;
+
         public MainWindow()
         {
             InitializeComponent();
+            db = new DatabaseHelper();
             ChargerVoitures();
         }
 
         private void ChargerVoitures()
         {
-            var data = db.ExecuteQuery("SELECT * FROM Voitures");
-            MyDataGrid.ItemsSource = data.DefaultView;
+            // ... (votre code existant pour charger les voitures)
+            try
+            {
+                string query = @"
+                    SELECT v.Id, v.Matricule, v.Marque, v.Modele, c.Libelle as Categorie, v.PrixParJour, v.EstDisponible
+                    FROM Voitures v
+                    INNER JOIN Categories c ON v.CategorieId = c.Id";
+                DataTable data = db.ExecuteQuery(query);
+                MyDataGrid.ItemsSource = data.DefaultView;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Erreur chargement : " + ex.Message);
+            }
+        }
+
+        private void BtnAjouter_Click(object sender, RoutedEventArgs e)
+        {
+            AjouterVoitureWindow fenetreAjout = new AjouterVoitureWindow();
+            fenetreAjout.ShowDialog();
+            ChargerVoitures();
+        }
+
+        // === NOUVEAU : GESTION DU BOUTON UTILISATEURS ===
+        private void BtnUsers_Click(object sender, RoutedEventArgs e)
+        {
+            GestionUtilisateursWindow fenetreUsers = new GestionUtilisateursWindow();
+            fenetreUsers.ShowDialog();
         }
     }
 }
