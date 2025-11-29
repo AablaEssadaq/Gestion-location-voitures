@@ -1,0 +1,125 @@
+﻿<Window x:Class="LocationVoiture.Admin.AjouterVoitureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ajouter un véhicule" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="#F3F4F6">
+
+    <Border Margin="20" Background="White" CornerRadius="12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.1"/>
+        </Border.Effect>
+
+        <Grid Margin="25">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*"/>
+                <!-- Colonne Formulaire -->
+                <ColumnDefinition Width="1*"/>
+                <!-- Colonne Image -->
+            </Grid.ColumnDefinitions>
+
+            <!-- === PARTIE GAUCHE : FORMULAIRE === -->
+            <StackPanel Grid.Column="0" Margin="0,0,25,0">
+                <TextBlock Text="Nouveau Véhicule" FontSize="24" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,20"/>
+
+                <!-- Ligne 1 : Marque et Modèle -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Marque" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtMarque" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Modèle" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtModele" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Ligne 2 : Matricule et Catégorie -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Matricule" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtMatricule" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Catégorie" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cbCategorie" Height="35" VerticalContentAlignment="Center" Padding="5" 
+                                  DisplayMemberPath="Libelle" SelectedValuePath="Id"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Ligne 3 : Carburant et Kilométrage (NOUVEAU) -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Carburant" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cbCarburant" Height="35" VerticalContentAlignment="Center" Padding="5">
+                            <ComboBoxItem Content="Diesel" IsSelected="True"/>
+                            <ComboBoxItem Content="Essence"/>
+                            <ComboBoxItem Content="Hybride"/>
+                            <ComboBoxItem Content="Electrique"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- NOUVEAU CHAMP ICI -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Kilométrage Actuel (km)" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtKm" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Ligne 4 : Prix (Seul sur la ligne pour l'instant) -->
+                <Grid Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Prix / Jour (DH)" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtPrix" Height="35" VerticalContentAlignment="Center" Padding="5" Width="150" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Boutons d'action -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <Button Content="Annuler" Click="BtnAnnuler_Click"
+                            Width="100" Height="40" Margin="0,0,10,0"
+                            Background="Transparent" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563" Cursor="Hand"/>
+
+                    <Button x:Name="btnEnregistrer" Content="Enregistrer" Click="BtnEnregistrer_Click"
+                            Width="140" Height="40"
+                            Background="#2563EB" BorderThickness="0" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- === PARTIE DROITE : IMAGE === -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="10,45,0,0">
+                <TextBlock Text="Photo du véhicule" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+
+                <Border Width="260" Height="200" BorderBrush="#E5E7EB" BorderThickness="2" CornerRadius="8" Background="#F9FAFB" Margin="0,0,0,15">
+                    <Image x:Name="imgApercu" Stretch="UniformToFill"/>
+                </Border>
+
+                <Button x:Name="btnParcourir" Content="Choisir une image..." Click="BtnParcourir_Click"
+                        HorizontalAlignment="Center" Width="200" Height="35"
+                        Background="#EFF6FF" BorderBrush="#2563EB" BorderThickness="1" Foreground="#2563EB" FontWeight="SemiBold" Cursor="Hand"/>
+
+                <TextBlock x:Name="lblCheminImage" Text="Aucun fichier sélectionné" 
+                           FontSize="12" Foreground="#9CA3AF" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

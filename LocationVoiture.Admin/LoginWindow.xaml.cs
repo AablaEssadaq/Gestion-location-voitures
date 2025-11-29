@@ -1,7 +1,8 @@
 ﻿using System.Windows;
-using LocationVoiture.Data; // Assurez-vous que ce namespace est correct
+using LocationVoiture.Data;
 using System.Data;
-using System.Data.SqlClient;
+// CORRECTION 1 : On utilise MySQL au lieu de SQL Server
+using MySql.Data.MySqlClient;
 
 namespace LocationVoiture.Admin
 {
@@ -24,13 +25,6 @@ namespace LocationVoiture.Admin
                 ShowError("Veuillez remplir tous les champs.");
                 return;
             }
-
-            // --- TEST RAPIDE (Décommentez pour tester sans base de données) ---
-            // if (username == "admin" && password == "admin")
-            // {
-            //     OuvrirApplication();
-            //     return;
-            // }
 
             // --- VRAIE VERIFICATION BDD ---
             if (VerifierBaseDeDonnees(username, password))
@@ -55,17 +49,20 @@ namespace LocationVoiture.Admin
             try
             {
                 DatabaseHelper db = new DatabaseHelper();
-                // Attention : Pensez à hasher les mots de passe en production !
-                string query = "SELECT COUNT(*) FROM AdminUsers WHERE Username = @user AND PasswordHash = @pass";
 
-                SqlParameter[] paramsDb = new SqlParameter[] {
-                    new SqlParameter("@user", user),
-                    new SqlParameter("@pass", pass)
+                // Note : Assurez-vous que votre table s'appelle bien "Utilisateurs" (comme dans le script MySQL)
+                // et non "AdminUsers" (ancien script SQL Server).
+                string query = "SELECT COUNT(*) FROM Utilisateurs WHERE Email = @user AND MotDePasse = @pass AND Role = 'Admin'";
+
+                // CORRECTION 2 : On utilise MySqlParameter
+                MySqlParameter[] paramsDb = new MySqlParameter[] {
+                    new MySqlParameter("@user", user),
+                    new MySqlParameter("@pass", pass)
                 };
 
                 DataTable result = db.ExecuteQuery(query, paramsDb);
 
-                if (result.Rows.Count > 0 && int.Parse(result.Rows[0][0].ToString()) > 0)
+                if (result.Rows.Count > 0 && Convert.ToInt32(result.Rows[0][0]) > 0)
                 {
                     return true;
                 }
