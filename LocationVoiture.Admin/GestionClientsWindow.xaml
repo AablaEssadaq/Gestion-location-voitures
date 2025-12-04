@@ -1,7 +1,7 @@
-﻿<Window x:Class="LocationVoiture.Admin.GestionUtilisateursWindow"
+﻿<Window x:Class="LocationVoiture.Admin.GestionClientsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gestion des Utilisateurs" Height="500" Width="900"
+        Title="Gestion des Clients" Height="550" Width="950"
         WindowStartupLocation="CenterScreen" Background="#F3F4F6">
 
     <Grid Margin="20">
@@ -12,8 +12,8 @@
 
         <!-- En-tête -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Équipe &amp; Accès" FontSize="24" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
-            <Button Content="+ Nouvel Employé" HorizontalAlignment="Right" Click="BtnAjouter_Click"
+            <TextBlock Text="Fichier Clients" FontSize="24" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
+            <Button Content="+ Nouveau Client" HorizontalAlignment="Right" Click="BtnAjouter_Click"
                     Height="35" Width="150" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
                 <Button.Resources>
                     <Style TargetType="Border">
@@ -24,10 +24,9 @@
         </Grid>
 
         <!-- Liste -->
-        <DataGrid Grid.Row="1" x:Name="UsersGrid" AutoGenerateColumns="False" 
+        <DataGrid Grid.Row="1" x:Name="ClientsGrid" AutoGenerateColumns="False" 
                   CanUserAddRows="False" IsReadOnly="True"
                   Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="35">
-
             <DataGrid.Resources>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Padding" Value="10"/>
@@ -42,19 +41,16 @@
                 <DataGridTextColumn Header="Nom" Binding="{Binding Nom}" Width="*"/>
                 <DataGridTextColumn Header="Prénom" Binding="{Binding Prenom}" Width="*"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*"/>
-                <DataGridTextColumn Header="Rôle" Binding="{Binding Role}" Width="100"/>
+                <DataGridTextColumn Header="Téléphone" Binding="{Binding Telephone}" Width="120"/>
+                <DataGridTextColumn Header="N° Permis" Binding="{Binding NumPermis}" Width="120"/>
 
-                <!-- Colonne Actions (Modifier / Supprimer) -->
                 <DataGridTemplateColumn Header="Actions" Width="160">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- Bouton MODIFIER -->
                                 <Button Content="Modifier" Click="BtnModifier_Click" 
                                         Background="#DBEAFE" Foreground="#1E40AF" BorderThickness="0" 
                                         FontSize="11" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"/>
-
-                                <!-- Bouton SUPPRIMER -->
                                 <Button Content="Supprimer" Click="BtnSupprimer_Click" 
                                         Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" 
                                         FontSize="11" Padding="8,0" Cursor="Hand" Tag="{Binding Id}"/>

@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Confirmation";
+}
+
+<div class="container mt-5 text-center">
+    <div class="card shadow-sm p-5 border-0">
+        <div class="mb-4">
+            <!-- Icone de succès (Check vert) -->
+            <div style="font-size: 80px; color: #28a745;">✓</div>
+        </div>
+
+        <h1 class="display-5 fw-bold text-success">Réservation enregistrée !</h1>
+        <p class="lead mt-3">Votre demande a bien été prise en compte.</p>
+        <p class="text-muted">Notre équipe va traiter votre demande dans les plus brefs délais.</p>
+
+        <div class="mt-5">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4">Retour à l'accueil</a>
+            <!-- Optionnel : Lien vers "Mes Réservations" si vous le faites plus tard -->
+        </div>
+    </div>
+</div>

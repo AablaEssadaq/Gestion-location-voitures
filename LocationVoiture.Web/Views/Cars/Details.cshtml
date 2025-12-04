@@ -1,0 +1,65 @@
+﻿@using System.Data
+@model DataRow
+
+@{
+    ViewData["Title"] = Model["Marque"] + " " + Model["Modele"];
+}
+
+<div class="container mt-4">
+    <a asp-action="Index" class="btn btn-link text-decoration-none mb-3">← Retour au catalogue</a>
+
+    <div class="row bg-white shadow-sm rounded overflow-hidden">
+        <!-- Colonne Image -->
+        <div class="col-md-7 p-0 bg-light d-flex align-items-center justify-content-center" style="min-height: 400px;">
+            @if (!string.IsNullOrEmpty(Model["ImageChemin"].ToString()))
+            {
+                <img src="@Model["ImageChemin"]" class="img-fluid" style="max-height: 500px; width: 100%; object-fit: cover;" alt="Voiture">
+            }
+            else
+            {
+                <h3 class="text-muted">Aucune image disponible</h3>
+            }
+        </div>
+
+        <!-- Colonne Infos -->
+        <div class="col-md-5 p-5 d-flex flex-column justify-content-center">
+            <span class="text-uppercase text-muted fw-bold small tracking-wide">@Model["Categorie"] • @Model["Carburant"]</span>
+
+            <h1 class="fw-bold text-dark mt-2 mb-4">@Model["Marque"] @Model["Modele"]</h1>
+
+            <div class="mb-4">
+                <span class="display-5 fw-bold text-primary">@Model["PrixParJour"] DH</span>
+                <span class="text-muted fs-5"> / jour</span>
+            </div>
+
+            <hr class="my-4 text-muted">
+
+            <h5 class="fw-bold mb-3">Caractéristiques</h5>
+            <ul class="list-unstyled text-secondary mb-5">
+                <li class="mb-2">⚡ <strong>Matricule :</strong> @Model["Matricule"]</li>
+                <li class="mb-2">⛽ <strong>Carburant :</strong> @Model["Carburant"]</li>
+                <li class="mb-2">🛣️ <strong>Kilométrage :</strong> @Model["KilometrageActuel"] km</li>
+            </ul>
+
+            <!-- Formulaire de Réservation -->
+            @if (Context.Session.GetString("ClientId") != null)
+            {
+                <form asp-controller="Booking" asp-action="Book" method="get">
+                    <input type="hidden" name="carId" value="@Model["Id"]" />
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Réserver maintenant</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-warning text-center">
+                    Connectez-vous pour réserver ce véhicule.
+                    <div class="mt-2">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-dark">Se connecter</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

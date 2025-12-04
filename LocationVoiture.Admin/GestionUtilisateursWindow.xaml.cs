@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls; // Pour Button
+using System.Windows.Controls;
 using LocationVoiture.Data;
 using System.Data;
 using MySql.Data.MySqlClient;
@@ -22,7 +22,7 @@ namespace LocationVoiture.Admin
         {
             try
             {
-                // On récupère tout sauf le mot de passe pour des raisons de sécurité
+                // J'ajoute MotDePasse dans le SELECT au cas où, mais on ne l'affiche pas dans la grille
                 string query = "SELECT Id, Nom, Prenom, Email, Role FROM Utilisateurs";
                 DataTable dt = db.ExecuteQuery(query);
                 UsersGrid.ItemsSource = dt.DefaultView;
@@ -35,15 +35,28 @@ namespace LocationVoiture.Admin
 
         private void BtnAjouter_Click(object sender, RoutedEventArgs e)
         {
-            // Ouvre la fenêtre d'ajout (qu'on va créer juste après)
             AjouterUtilisateurWindow fenetre = new AjouterUtilisateurWindow();
             fenetre.ShowDialog();
-            ChargerUtilisateurs(); // Rafraîchir la liste au retour
+            ChargerUtilisateurs();
+        }
+
+        // === NOUVEAU : CODE DU BOUTON MODIFIER ===
+        private void BtnModifier_Click(object sender, RoutedEventArgs e)
+        {
+            // On récupère l'ID du bouton cliqué
+            Button btn = (Button)sender;
+            int idToEdit = Convert.ToInt32(btn.Tag);
+
+            // On ouvre la fenêtre en mode "Modification" (en passant l'ID)
+            AjouterUtilisateurWindow fenetre = new AjouterUtilisateurWindow(idToEdit);
+            fenetre.ShowDialog();
+
+            // On rafraîchit la liste quand la fenêtre se ferme
+            ChargerUtilisateurs();
         }
 
         private void BtnSupprimer_Click(object sender, RoutedEventArgs e)
         {
-            // Récupérer l'ID via la propriété Tag du bouton cliqué
             Button btn = (Button)sender;
             int idToDelete = Convert.ToInt32(btn.Tag);
 
@@ -55,7 +68,7 @@ namespace LocationVoiture.Admin
                     MySqlParameter[] param = { new MySqlParameter("@id", idToDelete) };
                     db.ExecuteNonQuery(query, param);
 
-                    ChargerUtilisateurs(); // Rafraîchir
+                    ChargerUtilisateurs();
                 }
                 catch (Exception ex)
                 {
@@ -64,5 +77,4 @@ namespace LocationVoiture.Admin
             }
         }
     }
-
 }
