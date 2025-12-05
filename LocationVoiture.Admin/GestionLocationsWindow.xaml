@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LocationVoiture.Admin.GestionLocationsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Suivi des Locations" Height="600" Width="1000"
+        Title="Suivi des Locations" Height="600" Width="1100"
         WindowStartupLocation="CenterScreen" Background="#F3F4F6">
 
     <Grid Margin="20">
@@ -37,27 +37,34 @@
                 <DataGridTextColumn Header="Véhicule" Binding="{Binding ModeleVoiture}" Width="*"/>
 
                 <!-- Dates & Prix -->
-                <DataGridTextColumn Header="Du" Binding="{Binding DateDebut, StringFormat=dd/MM/yyyy}" Width="100"/>
-                <DataGridTextColumn Header="Au" Binding="{Binding DateFin, StringFormat=dd/MM/yyyy}" Width="100"/>
+                <DataGridTextColumn Header="Du" Binding="{Binding DateDebut, StringFormat=dd/MM/yyyy}" Width="90"/>
+                <DataGridTextColumn Header="Au" Binding="{Binding DateFin, StringFormat=dd/MM/yyyy}" Width="90"/>
                 <DataGridTextColumn Header="Total" Binding="{Binding PrixTotal, StringFormat={}{0} DH}" Width="80" FontWeight="Bold"/>
 
-                <!-- Statut (Coloré si possible, ici simple texte) -->
+                <!-- Statut -->
                 <DataGridTextColumn Header="Statut" Binding="{Binding Statut}" Width="100" FontWeight="Bold"/>
 
                 <!-- Actions -->
-                <DataGridTemplateColumn Header="Décision" Width="220">
+                <DataGridTemplateColumn Header="Gestion" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- Bouton Valider (Visible seulement si 'En Attente') -->
+
+                                <!-- BOUTON VOIR RECU -->
+                                <Button Content="📄 VOIR REÇU" Click="BtnVoirRecu_Click" 
+                        Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                        FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"
+                        ToolTip="Ouvrir le bon de réservation PDF"/>
+
+                                <!-- Bouton Valider -->
                                 <Button Content="✅ Valider" Click="BtnValider_Click" 
-                                        Background="#10B981" Foreground="White" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding}"/>
+                        Background="#10B981" Foreground="White" BorderThickness="0" 
+                        FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding}"/>
 
                                 <!-- Bouton Refuser -->
                                 <Button Content="❌ Refuser" Click="BtnRefuser_Click" 
-                                        Background="#EF4444" Foreground="White" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Cursor="Hand" Tag="{Binding}"/>
+                        Background="#EF4444" Foreground="White" BorderThickness="0" 
+                        FontSize="11" Padding="8,4" Cursor="Hand" Tag="{Binding}"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

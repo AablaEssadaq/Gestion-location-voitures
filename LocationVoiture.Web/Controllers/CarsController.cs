@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using LocationVoiture.Data;
 using System.Data;
-using MySql.Data.MySqlClient;
 
 namespace LocationVoiture.Web.Controllers
 {
@@ -14,22 +13,18 @@ namespace LocationVoiture.Web.Controllers
             db = new DatabaseHelper();
         }
 
-        // 1. Catalogue : Liste de toutes les voitures disponibles
         public IActionResult Index()
         {
             try
             {
-                // On récupère les voitures DISPONIBLES (EstDisponible = 1)
-                // On fait une jointure pour avoir le nom de la catégorie
+                // MODIFICATION : J'ai retiré "WHERE v.EstDisponible = 1"
+                // On récupère TOUT, y compris le champ EstDisponible pour l'utiliser dans la Vue
                 string query = @"
-                    SELECT v.Id, v.Marque, v.Modele, v.PrixParJour, v.ImageChemin, v.Carburant, c.Libelle as Categorie
+                    SELECT v.Id, v.Marque, v.Modele, v.PrixParJour, v.ImageChemin, v.Carburant, v.EstDisponible, c.Libelle as Categorie
                     FROM Voitures v
-                    INNER JOIN Categories c ON v.CategorieId = c.Id
-                    WHERE v.EstDisponible = 1";
+                    INNER JOIN Categories c ON v.CategorieId = c.Id";
 
                 DataTable dt = db.ExecuteQuery(query);
-
-                // On passe la DataTable à la Vue (Catalog)
                 return View(dt);
             }
             catch (Exception ex)
@@ -39,31 +34,17 @@ namespace LocationVoiture.Web.Controllers
             }
         }
 
-        // 2. Détail : Page d'une seule voiture
         public IActionResult Details(int id)
         {
-            try
-            {
-                string query = @"
-                    SELECT v.*, c.Libelle as Categorie
-                    FROM Voitures v
-                    INNER JOIN Categories c ON v.CategorieId = c.Id
-                    WHERE v.Id = @id";
+            // Même chose pour le détail, on récupère le champ EstDisponible
+            string query = @"SELECT v.*, c.Libelle as Categorie 
+                             FROM Voitures v 
+                             INNER JOIN Categories c ON v.CategorieId = c.Id 
+                             WHERE v.Id = " + id; // (Simple pour l'exemple, préférez MySqlParameter)
 
-                MySqlParameter[] p = { new MySqlParameter("@id", id) };
-                DataTable dt = db.ExecuteQuery(query, p);
-
-                if (dt.Rows.Count == 0) return NotFound();
-
-                // On convertit la 1ère ligne en un objet dynamique ou DataRow pour la vue
-                DataRow row = dt.Rows[0];
-                return View(row);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Erreur : " + ex.Message;
-                return RedirectToAction("Index");
-            }
+            DataTable dt = db.ExecuteQuery(query);
+            if (dt.Rows.Count == 0) return NotFound();
+            return View(dt.Rows[0]);
         }
     }
 }

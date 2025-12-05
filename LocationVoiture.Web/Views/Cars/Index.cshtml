@@ -7,61 +7,68 @@
 
 <div class="text-center mb-5">
     <h1 class="display-4 fw-bold text-primary">Notre Flotte</h1>
-    <p class="lead text-muted">Trouvez la voiture parfaite pour votre prochain voyage.</p>
 </div>
 
-@if (Model.Rows.Count == 0)
-{
-    <div class="alert alert-info text-center">
-        Aucune voiture disponible pour le moment. Revenez plus tard !
-    </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (DataRow row in Model.Rows)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm border-0 hover-effect">
-                    <!-- Image -->
-                    <div style="height: 200px; overflow: hidden;" class="bg-light d-flex align-items-center justify-content-center">
-                        @if (!string.IsNullOrEmpty(row["ImageChemin"].ToString()))
-                        {
-                            <img src="@row["ImageChemin"]" class="card-img-top" style="object-fit: cover; height: 100%; width: 100%;" alt="@row["Modele"]">
-                        }
-                        else
-                        {
-                            <span class="text-muted">Pas d'image</span>
-                        }
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (DataRow row in Model.Rows)
+    {
+        // On vérifie la disponibilité (booléen ou 0/1)
+        bool isAvailable = Convert.ToBoolean(row["EstDisponible"]);
+
+        <div class="col">
+            <!-- Si indisponible, on met une bordure grise et on réduit l'opacité -->
+            <div class="card h-100 shadow-sm border-0 @(isAvailable ? "hover-effect" : "opacity-75 bg-light")">
+
+                <div style="height: 200px; overflow: hidden; position: relative;" class="bg-white d-flex align-items-center justify-content-center">
+                    @if (!string.IsNullOrEmpty(row["ImageChemin"].ToString()))
+                    {
+                        <!-- Image en noir et blanc si indisponible (option de style) -->
+                        <img src="@row["ImageChemin"]" class="card-img-top @(isAvailable ? "" : "grayscale")" style="object-fit: cover; height: 100%; width: 100%;" alt="@row["Modele"]">
+                    }
+
+                    <!-- BADGE SI INDISPONIBLE -->
+                    @if (!isAvailable)
+                    {
+                        <span class="position-absolute top-50 start-50 translate-middle badge bg-danger fs-5 px-3 py-2 shadow">
+                            NON DISPONIBLE
+                        </span>
+                    }
+                </div>
+
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">@row["Categorie"]</span>
+                        <span class="badge bg-light text-dark border">@row["Carburant"]</span>
                     </div>
 
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-secondary">@row["Categorie"]</span>
-                            <span class="badge bg-light text-dark border">@row["Carburant"]</span>
-                        </div>
+                    <h5 class="card-title fw-bold">@row["Marque"] @row["Modele"]</h5>
 
-                        <h5 class="card-title fw-bold">@row["Marque"] @row["Modele"]</h5>
+                    <p class="card-text text-primary fs-4 fw-bold mb-0">
+                        @row["PrixParJour"] DH <span class="fs-6 text-muted fw-normal">/ jour</span>
+                    </p>
+                </div>
 
-                        <p class="card-text text-primary fs-4 fw-bold mb-0">
-                            @row["PrixParJour"] DH <span class="fs-6 text-muted fw-normal">/ jour</span>
-                        </p>
-                    </div>
-
-                    <div class="card-footer bg-white border-0 pb-3">
-                        <div class="d-grid">
+                <div class="card-footer bg-white border-0 pb-3">
+                    <div class="d-grid">
+                        @if (isAvailable)
+                        {
                             <a asp-action="Details" asp-route-id="@row["Id"]" class="btn btn-outline-primary fw-bold">
                                 Voir détails & Réserver
                             </a>
-                        </div>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" disabled>Momentanément indisponible</button>
+                        }
                     </div>
                 </div>
             </div>
-        }
-    </div>
-}
+        </div>
+    }
+</div>
 
 <style>
     .hover-effect { transition: transform 0.2s; }
     .hover-effect:hover { transform: translateY(-5px); }
+    .grayscale { filter: grayscale(100%); }
 </style>
