@@ -13,44 +13,35 @@ namespace LocationVoiture.Admin
     {
         private string _cheminImageSource = null;
         private DatabaseHelper db;
-        private int? _idVoitureModif = null; // Si null = Ajout, sinon = Modification
-        private string _ancienCheminImageWeb = null; // Pour garder l'ancienne image si on n'en change pas
+        private int? _idVoitureModif = null;
+        private string _ancienCheminImageWeb = null;
 
-        // Constructeur Ajout
-        public AjouterVoitureWindow()
+        public AjouterVoitureWindow(int idVoiture = 0)
         {
             InitializeComponent();
-            InitWindow("Ajouter un véhicule");
-        }
+            db = new DatabaseHelper();
+            ChargerCategories();
 
-        // Constructeur Modification
-        public AjouterVoitureWindow(int idVoiture)
-        {
-            InitializeComponent();
-            _idVoitureModif = idVoiture;
-            InitWindow("Modifier le véhicule");
-            ChargerVoitureExistante(idVoiture);
-        }
-
-        private void InitWindow(string titre)
-        {
-            this.Title = titre;
-            try
+            if (idVoiture > 0)
             {
-                db = new DatabaseHelper();
-                ChargerCategories();
+                _idVoitureModif = idVoiture;
+                this.Title = "Modifier le véhicule";
+                btnEnregistrer.Content = "Mettre à jour";
+                ChargerVoitureExistante(idVoiture);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
         private void ChargerCategories()
         {
-            DataTable dt = db.ExecuteQuery("SELECT Id, Libelle FROM Categories");
-            cbCategorie.ItemsSource = dt.DefaultView;
-            if (cbCategorie.Items.Count > 0) cbCategorie.SelectedIndex = 0;
+            try
+            {
+                DataTable dt = db.ExecuteQuery("SELECT Id, Libelle FROM Categories");
+                cbCategorie.ItemsSource = dt.DefaultView;
+                if (cbCategorie.Items.Count > 0) cbCategorie.SelectedIndex = 0;
+            }
+            catch { }
         }
 
-        // Charge les données de la voiture à modifier
         private void ChargerVoitureExistante(int id)
         {
             try
@@ -66,51 +57,29 @@ namespace LocationVoiture.Admin
                     txtModele.Text = row["Modele"].ToString();
                     txtMatricule.Text = row["Matricule"].ToString();
                     txtPrix.Text = row["PrixParJour"].ToString();
-                    txtKm.Text = row["KilometrageActuel"].ToString(); // Charge le KM
-
+                    txtKm.Text = row["KilometrageActuel"].ToString();
                     cbCategorie.SelectedValue = row["CategorieId"];
                     cbCarburant.Text = row["Carburant"].ToString();
-                    btnEnregistrer.Content = "Mettre à jour";
 
-                    // Gestion Image
+                    // GESTION CHECKBOX DISPONIBILITÉ
+                    // Si EstDisponible == 1 (True), on coche. Sinon on décoche.
+                    bool estDispo = Convert.ToBoolean(row["EstDisponible"]);
+                    chkDisponible.IsChecked = estDispo;
+
                     string cheminWeb = row["ImageChemin"].ToString();
                     if (!string.IsNullOrEmpty(cheminWeb))
                     {
-                        _ancienCheminImageWeb = cheminWeb; // On garde le chemin en mémoire
-
-                        // Pour afficher l'image, il faut retrouver le chemin physique complet
-                        string dossierWeb = GetCheminImagesWeb();
-                        string nomFichier = Path.GetFileName(cheminWeb); // juste "guid.jpg"
-                        string cheminPhysique = Path.Combine(dossierWeb, nomFichier);
-
-                        if (File.Exists(cheminPhysique))
-                        {
-                            imgApercu.Source = new BitmapImage(new Uri(cheminPhysique));
-                        }
+                        _ancienCheminImageWeb = cheminWeb;
+                        string cheminPhysique = Path.Combine(GetCheminImagesWeb(), Path.GetFileName(cheminWeb));
+                        if (File.Exists(cheminPhysique)) imgApercu.Source = new BitmapImage(new Uri(cheminPhysique));
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erreur chargement voiture : " + ex.Message);
-            }
-        }
-
-        private void BtnParcourir_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog op = new OpenFileDialog();
-            op.Filter = "Images (*.jpg;*.png)|*.jpg;*.png";
-            if (op.ShowDialog() == true)
-            {
-                _cheminImageSource = op.FileName;
-                lblCheminImage.Text = Path.GetFileName(_cheminImageSource);
-                imgApercu.Source = new BitmapImage(new Uri(_cheminImageSource));
-            }
+            catch (Exception ex) { MessageBox.Show("Erreur chargement : " + ex.Message); }
         }
 
         private void BtnEnregistrer_Click(object sender, RoutedEventArgs e)
         {
-            // Validation
             if (string.IsNullOrWhiteSpace(txtMarque.Text) || string.IsNullOrWhiteSpace(txtMatricule.Text) || string.IsNullOrWhiteSpace(txtPrix.Text))
             {
                 MessageBox.Show("Champs obligatoires manquants.");
@@ -119,68 +88,75 @@ namespace LocationVoiture.Admin
 
             try
             {
-                string cheminFinalPourBdd = _ancienCheminImageWeb; // Par défaut, on garde l'ancienne
-
-                // Si une NOUVELLE image a été choisie, on l'upload
+                string cheminFinal = _ancienCheminImageWeb;
                 if (_cheminImageSource != null)
                 {
-                    string dossierWeb = GetCheminImagesWeb();
-                    string nomFichierUnique = Guid.NewGuid().ToString() + Path.GetExtension(_cheminImageSource);
-                    string cheminDestination = Path.Combine(dossierWeb, nomFichierUnique);
-                    File.Copy(_cheminImageSource, cheminDestination, true);
-
-                    cheminFinalPourBdd = "/images/" + nomFichierUnique;
+                    string dossier = GetCheminImagesWeb();
+                    string nom = Guid.NewGuid() + Path.GetExtension(_cheminImageSource);
+                    File.Copy(_cheminImageSource, Path.Combine(dossier, nom), true);
+                    cheminFinal = "/images/" + nom;
                 }
 
+                // RECUPERER LA VALEUR DE LA CHECKBOX
+                bool estDispo = chkDisponible.IsChecked == true; // True si coché, False si décoché
+
                 string query;
-                MySqlParameter[] parametres;
+                MySqlParameter[] p;
 
                 if (_idVoitureModif == null)
                 {
-                    // INSERT
                     query = @"INSERT INTO Voitures (Marque, Modele, Matricule, CategorieId, Carburant, PrixParJour, ImageChemin, KilometrageActuel, EstDisponible) 
-                              VALUES (@marque, @modele, @matricule, @catId, @carbu, @prix, @img, @km, 1)";
+                              VALUES (@marque, @modele, @matricule, @catId, @carbu, @prix, @img, @km, @dispo)";
 
-                    parametres = new MySqlParameter[] {
+                    p = new MySqlParameter[] {
                         new MySqlParameter("@marque", txtMarque.Text),
                         new MySqlParameter("@modele", txtModele.Text),
                         new MySqlParameter("@matricule", txtMatricule.Text),
                         new MySqlParameter("@catId", cbCategorie.SelectedValue),
                         new MySqlParameter("@carbu", cbCarburant.Text),
                         new MySqlParameter("@prix", decimal.Parse(txtPrix.Text)),
-                        new MySqlParameter("@img", (object)cheminFinalPourBdd ?? DBNull.Value),
-                        new MySqlParameter("@km", int.Parse(txtKm.Text))
+                        new MySqlParameter("@img", (object)cheminFinal ?? DBNull.Value),
+                        new MySqlParameter("@km", int.Parse(txtKm.Text)),
+                        new MySqlParameter("@dispo", estDispo) // On envoie le booléen
                     };
                 }
                 else
                 {
-                    // UPDATE
                     query = @"UPDATE Voitures SET 
                               Marque=@marque, Modele=@modele, Matricule=@matricule, 
                               CategorieId=@catId, Carburant=@carbu, PrixParJour=@prix, 
-                              ImageChemin=@img, KilometrageActuel=@km 
+                              ImageChemin=@img, KilometrageActuel=@km, EstDisponible=@dispo
                               WHERE Id=@id";
 
-                    parametres = new MySqlParameter[] {
+                    p = new MySqlParameter[] {
                         new MySqlParameter("@marque", txtMarque.Text),
                         new MySqlParameter("@modele", txtModele.Text),
                         new MySqlParameter("@matricule", txtMatricule.Text),
                         new MySqlParameter("@catId", cbCategorie.SelectedValue),
                         new MySqlParameter("@carbu", cbCarburant.Text),
                         new MySqlParameter("@prix", decimal.Parse(txtPrix.Text)),
-                        new MySqlParameter("@img", (object)cheminFinalPourBdd ?? DBNull.Value),
+                        new MySqlParameter("@img", (object)cheminFinal ?? DBNull.Value),
                         new MySqlParameter("@km", int.Parse(txtKm.Text)),
+                        new MySqlParameter("@dispo", estDispo), // On envoie le booléen
                         new MySqlParameter("@id", _idVoitureModif)
                     };
                 }
 
-                db.ExecuteNonQuery(query, parametres);
-                MessageBox.Show("Enregistrement réussi !");
+                db.ExecuteNonQuery(query, p);
+                MessageBox.Show("Enregistré avec succès !");
                 this.Close();
             }
-            catch (Exception ex)
+            catch (Exception ex) { MessageBox.Show("Erreur : " + ex.Message); }
+        }
+
+        private void BtnParcourir_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog { Filter = "Images (*.jpg;*.png)|*.jpg;*.png" };
+            if (op.ShowDialog() == true)
             {
-                MessageBox.Show("Erreur : " + ex.Message);
+                _cheminImageSource = op.FileName;
+                lblCheminImage.Text = Path.GetFileName(_cheminImageSource);
+                imgApercu.Source = new BitmapImage(new Uri(_cheminImageSource));
             }
         }
 
@@ -188,11 +164,9 @@ namespace LocationVoiture.Admin
 
         private string GetCheminImagesWeb()
         {
-            string dossierExecution = AppDomain.CurrentDomain.BaseDirectory;
-            string cheminRelatif = @"..\..\..\..\LocationVoiture.Web\wwwroot\images";
-            string cheminFinal = Path.GetFullPath(Path.Combine(dossierExecution, cheminRelatif));
-            if (!Directory.Exists(cheminFinal)) Directory.CreateDirectory(cheminFinal);
-            return cheminFinal;
+            string path = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\LocationVoiture.Web\wwwroot\images"));
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            return path;
         }
     }
 }
