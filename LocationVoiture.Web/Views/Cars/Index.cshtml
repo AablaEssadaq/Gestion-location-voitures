@@ -3,72 +3,205 @@
 
 @{
     ViewData["Title"] = "Nos Véhicules";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    string currentSearch = ViewBag.CurrentSearch as string;
+    int? currentCat = ViewBag.CurrentCategory as int?;
+    string currentBrand = ViewBag.CurrentBrand as string; // NOUVEAU
 }
 
 <div class="text-center mb-5">
     <h1 class="display-4 fw-bold text-primary">Notre Flotte</h1>
+    <p class="lead text-muted">Trouvez le véhicule parfait pour votre besoin.</p>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @foreach (DataRow row in Model.Rows)
-    {
-        // On vérifie la disponibilité (booléen ou 0/1)
-        bool isAvailable = Convert.ToBoolean(row["EstDisponible"]);
+<!-- BARRE DE RECHERCHE ET FILTRES -->
+<div class="card shadow-sm mb-5 border-0 bg-light">
+    <div class="card-body p-4">
+        <form method="get" asp-action="Index" class="row g-3 justify-content-center align-items-end">
 
-        <div class="col">
-            <!-- Si indisponible, on met une bordure grise et on réduit l'opacité -->
-            <div class="card h-100 shadow-sm border-0 @(isAvailable ? "hover-effect" : "opacity-75 bg-light")">
-
-                <div style="height: 200px; overflow: hidden; position: relative;" class="bg-white d-flex align-items-center justify-content-center">
-                    @if (!string.IsNullOrEmpty(row["ImageChemin"].ToString()))
-                    {
-                        <!-- Image en noir et blanc si indisponible (option de style) -->
-                        <img src="@row["ImageChemin"]" class="card-img-top @(isAvailable ? "" : "grayscale")" style="object-fit: cover; height: 100%; width: 100%;" alt="@row["Modele"]">
-                    }
-
-                    <!-- BADGE SI INDISPONIBLE -->
-                    @if (!isAvailable)
-                    {
-                        <span class="position-absolute top-50 start-50 translate-middle badge bg-danger fs-5 px-3 py-2 shadow">
-                            NON DISPONIBLE
-                        </span>
-                    }
+            <!-- Recherche Texte -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Recherche</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchString" value="@currentSearch" class="form-control border-start-0" placeholder="Modèle..." aria-label="Recherche">
                 </div>
+            </div>
 
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-secondary">@row["Categorie"]</span>
-                        <span class="badge bg-light text-dark border">@row["Carburant"]</span>
-                    </div>
-
-                    <h5 class="card-title fw-bold">@row["Marque"] @row["Modele"]</h5>
-
-                    <p class="card-text text-primary fs-4 fw-bold mb-0">
-                        @row["PrixParJour"] DH <span class="fs-6 text-muted fw-normal">/ jour</span>
-                    </p>
-                </div>
-
-                <div class="card-footer bg-white border-0 pb-3">
-                    <div class="d-grid">
-                        @if (isAvailable)
+            <!-- Filtre Marque (NOUVEAU) -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Marque</label>
+                <select name="brand" class="form-select">
+                    <option value="">Toutes les marques</option>
+                    @if (ViewBag.Brands != null)
+                    {
+                        foreach (string marque in ViewBag.Brands)
                         {
-                            <a asp-action="Details" asp-route-id="@row["Id"]" class="btn btn-outline-primary fw-bold">
-                                Voir détails & Réserver
-                            </a>
+                            if (currentBrand == marque)
+                            {
+                                <option value="@marque" selected>@marque</option>
+                            }
+                            else
+                            {
+                                <option value="@marque">@marque</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Filtre Catégorie -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Catégorie</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">Toutes les catégories</option>
+                    @if (ViewBag.Categories != null)
+                    {
+                        foreach (DataRow cat in ((DataTable)ViewBag.Categories).Rows)
+                        {
+                            bool isSelected = currentCat == Convert.ToInt32(cat["Id"]);
+                            if (isSelected)
+                            {
+                                <option value="@cat["Id"]" selected>@cat["Libelle"]</option>
+                            }
+                            else
+                            {
+                                <option value="@cat["Id"]">@cat["Libelle"]</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Boutons -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Filtrer</button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Réinitialiser">↺</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LISTE DES VOITURES -->
+@if (Model.Rows.Count == 0)
+{
+    <div class="alert alert-info text-center py-5">
+        <h4>Aucune voiture trouvée 😕</h4>
+        <p>Essayez de modifier vos critères de recherche.</p>
+        <a asp-action="Index" class="btn btn-outline-primary mt-3">Voir toutes les voitures</a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        @foreach (DataRow row in Model.Rows)
+        {
+            bool estDispo = row["EstDisponible"] != DBNull.Value && Convert.ToBoolean(row["EstDisponible"]);
+
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 @(estDispo ? "hover-effect" : "bg-light border-secondary opacity-75")">
+
+                    <div style="height: 200px; overflow: hidden; position: relative;" class="bg-white d-flex align-items-center justify-content-center">
+                        @if (!string.IsNullOrEmpty(row["ImageChemin"].ToString()))
+                        {
+                            <img src="@row["ImageChemin"]" class="card-img-top @(estDispo ? "" : "grayscale")"
+                                 style="object-fit: cover; height: 100%; width: 100%;" alt="@row["Modele"]">
                         }
                         else
                         {
-                            <button class="btn btn-secondary" disabled>Momentanément indisponible</button>
+                            <span class="text-muted">Pas d'image</span>
                         }
+
+                        @if (!estDispo)
+                        {
+                            <span class="position-absolute top-50 start-50 translate-middle badge bg-danger fs-5 px-3 py-2 shadow border border-white">
+                                NON DISPONIBLE
+                            </span>
+                        }
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary">@row["Categorie"]</span>
+                            <span class="badge bg-light text-dark border">@row["Carburant"]</span>
+                        </div>
+
+                        <h5 class="card-title fw-bold text-dark">@row["Marque"] @row["Modele"]</h5>
+
+                        <p class="card-text text-primary fs-4 fw-bold mb-0">
+                            @row["PrixParJour"] DH <span class="fs-6 text-muted fw-normal">/ jour</span>
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <div class="d-grid">
+                            @if (estDispo)
+                            {
+                                <a asp-action="Details" asp-route-id="@row["Id"]" class="btn btn-outline-primary fw-bold">
+                                    Voir détails & Réserver
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled>Indisponible</button>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
+    </div>
+
+    <!-- PAGINATION -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <!-- Précédent -->
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(currentPage - 1)"
+                       asp-route-searchString="@currentSearch"
+                       asp-route-categoryId="@currentCat"
+                       asp-route-brand="@currentBrand">Précédent</a> <!-- Ajout asp-route-brand -->
+                </li>
+
+                <!-- Numéros -->
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-searchString="@currentSearch"
+                           asp-route-categoryId="@currentCat"
+                           asp-route-brand="@currentBrand">@i</a> <!-- Ajout asp-route-brand -->
+                    </li>
+                }
+
+                <!-- Suivant -->
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(currentPage + 1)"
+                       asp-route-searchString="@currentSearch"
+                       asp-route-categoryId="@currentCat"
+                       asp-route-brand="@currentBrand">Suivant</a> <!-- Ajout asp-route-brand -->
+                </li>
+            </ul>
+        </nav>
     }
-</div>
+}
 
 <style>
-    .hover-effect { transition: transform 0.2s; }
-    .hover-effect:hover { transform: translateY(-5px); }
-    .grayscale { filter: grayscale(100%); }
+    .hover-effect {
+        transition: transform 0.2s;
+    }
+
+        .hover-effect:hover {
+            transform: translateY(-5px);
+        }
+
+    .grayscale {
+        filter: grayscale(100%);
+    }
 </style>

@@ -3,58 +3,133 @@
     ViewData["Title"] = "Inscription";
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white text-center">
-                    <h4>Créer un nouveau compte</h4>
-                </div>
-                <div class="card-body">
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger">@ViewBag.Error</div>
-                    }
+<div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background-color: #f0f2f5;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <!-- Plus large que le login car plus de champs -->
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                    <div class="row g-0">
 
-                    <form asp-action="Register" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Nom *</label>
-                                <input asp-for="Nom" class="form-control" required />
+                        <!-- PARTIE GAUCHE : FORMULAIRE -->
+                        <div class="col-lg-7 bg-white p-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="bi bi-person-plus-fill text-primary fs-2 me-2"></i>
+                                <span class="h4 fw-bold mb-0 text-uppercase text-primary">Nouveau Compte</span>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Prénom *</label>
-                                <input asp-for="Prenom" class="form-control" required />
+
+                            <h3 class="fw-bold text-dark mb-2">Rejoignez-nous !</h3>
+                            <p class="text-muted mb-4">Remplissez le formulaire ci-dessous pour créer votre espace client.</p>
+
+                            <!-- Message Erreur -->
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger d-flex align-items-center rounded-3 mb-4" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <div>@ViewBag.Error</div>
+                                </div>
+                            }
+
+                            <form asp-action="Register" method="post">
+                                <div class="row g-3">
+                                    <!-- Nom & Prénom -->
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Nom" class="form-control rounded-3" id="floatingNom" placeholder="Nom" required>
+                                            <label for="floatingNom" class="text-muted">Nom *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Prenom" class="form-control rounded-3" id="floatingPrenom" placeholder="Prénom" required>
+                                            <label for="floatingPrenom" class="text-muted">Prénom *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="Email" type="email" class="form-control rounded-3" id="floatingEmail" placeholder="name@example.com" required>
+                                            <label for="floatingEmail" class="text-muted">Adresse Email *</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Téléphone & Permis -->
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Telephone" class="form-control rounded-3" id="floatingTel" placeholder="06...">
+                                            <label for="floatingTel" class="text-muted">Téléphone</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="NumPermis" class="form-control rounded-3" id="floatingPermis" placeholder="Permis">
+                                            <label for="floatingPermis" class="text-muted">Numéro de Permis</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mot de passe -->
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="MotDePasse" type="password" class="form-control rounded-3" id="floatingPassword" placeholder="Mot de passe" required>
+                                            <label for="floatingPassword" class="text-muted">Mot de passe *</label>
+                                        </div>
+                                        <div class="form-text ms-1 mt-1 text-muted small"><i class="bi bi-shield-lock"></i> Utilisez un mot de passe sécurisé.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Bouton Inscription -->
+                                <div class="d-grid mt-4 mb-4">
+                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-sm hover-elevate">
+                                        CRÉER MON COMPTE
+                                    </button>
+                                </div>
+
+                                <!-- Liens -->
+                                <div class="text-center border-top pt-3">
+                                    <p class="text-muted mb-0">
+                                        Vous avez déjà un compte ?
+                                        <a asp-action="Login" class="text-primary fw-bold text-decoration-none">Se connecter</a>
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- PARTIE DROITE : IMAGE D'AMBIANCE -->
+                        <div class="col-lg-5 d-none d-lg-block bg-register-image"
+                             style="background-image: url('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                            <div class="h-100 d-flex flex-column justify-content-center p-5 text-white" style="background: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.3));">
+                                <h2 class="display-6 fw-bold mb-3">Prenez la route</h2>
+                                <p class="lead mb-4">Inscrivez-vous dès maintenant pour accéder à notre flotte exclusive et réserver votre prochain véhicule en quelques clics.</p>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Réservation 24h/24</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Annulation gratuite</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Support client dédié</li>
+                                </ul>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Email *</label>
-                            <input asp-for="Email" type="email" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Téléphone</label>
-                            <input asp-for="Telephone" class="form-control" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Numéro de Permis</label>
-                            <input asp-for="NumPermis" class="form-control" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Mot de passe *</label>
-                            <input asp-for="MotDePasse" type="password" class="form-control" required />
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success">S'inscrire</button>
-                            <a asp-action="Login" class="btn btn-outline-secondary">Annuler</a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Effet de survol sur le bouton */
+    .hover-elevate {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .hover-elevate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3) !important;
+        }
+
+    /* Style des champs input focus */
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+</style>

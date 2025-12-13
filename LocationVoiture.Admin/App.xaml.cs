@@ -1,14 +1,10 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
 
 namespace LocationVoiture.Admin
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        // Cette variable stockera le rôle ("Admin" ou "Employe")
+        public static string CurrentRole { get; set; } = "";
     }
-
 }

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LocationVoiture.Admin.AjouterUtilisateurWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Nouvel Employé" Height="750" Width="400"
+        Title="Nouvel Employé" Height="450" Width="400"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="#F3F4F6">
 
     <Border Margin="20" Background="White" CornerRadius="10">
@@ -20,9 +20,9 @@
             <TextBlock Text="Email" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
             <TextBox x:Name="txtEmail" Height="35" Padding="5" Margin="0,0,0,15"/>
 
-            <!-- Mot de passe -->
+            <!-- Mot de passe (CORRIGÉ : PasswordBox) -->
             <TextBlock Text="Mot de passe provisoire" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtMdp" Height="35" Padding="5" Margin="0,0,0,15"/>
+            <PasswordBox x:Name="txtMdp" Height="35" Padding="5" Margin="0,0,0,15"/>
 
             <!-- Rôle -->
             <TextBlock Text="Rôle" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>

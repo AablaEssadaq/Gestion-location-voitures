@@ -1,8 +1,66 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- === SECTION HÉROS (BANNIÈRE) === -->
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light rounded-3 shadow-sm"
+     style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
+
+    <div class="col-md-8 p-lg-5 mx-auto my-5 text-white">
+        <h1 class="display-3 fw-bold mb-3">Louez la voiture de vos rêves</h1>
+        <p class="lead fw-normal mb-4">
+            Des citadines économiques aux SUV spacieux, trouvez le véhicule idéal pour votre prochain voyage à des prix imbattables.
+        </p>
+        <a class="btn btn-primary btn-lg px-4 gap-3 fw-bold" asp-controller="Cars" asp-action="Index">
+            Voir nos véhicules ➔
+        </a>
+    </div>
+</div>
+
+<!-- === SECTION AVANTAGES === -->
+<div class="container px-4 py-5" id="featured-3">
+    <h2 class="pb-2 border-bottom text-center text-primary fw-bold">Pourquoi nous choisir ?</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3 text-center">
+
+        <!-- Avantage 1 -->
+        <div class="feature col">
+            <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 60px; height: 60px; font-size: 24px;">
+                ⚡
+            </div>
+            <h3 class="fs-4 fw-bold text-dark">Réservation Rapide</h3>
+            <p class="text-muted">Réservez votre voiture en quelques clics grâce à notre plateforme intuitive et sécurisée. Confirmation immédiate.</p>
+        </div>
+
+        <!-- Avantage 2 -->
+        <div class="feature col">
+            <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 60px; height: 60px; font-size: 24px;">
+                💰
+            </div>
+            <h3 class="fs-4 fw-bold text-dark">Meilleurs Prix</h3>
+            <p class="text-muted">Profitez de tarifs compétitifs sans frais cachés. Nous vous garantissons le meilleur rapport qualité/prix.</p>
+        </div>
+
+        <!-- Avantage 3 -->
+        <div class="feature col">
+            <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 60px; height: 60px; font-size: 24px;">
+                🛡️
+            </div>
+            <h3 class="fs-4 fw-bold text-dark">Sécurité & Assistance</h3>
+            <p class="text-muted">Tous nos véhicules sont récents, assurés et entretenus régulièrement. Assistance 24h/24 et 7j/7 incluse.</p>
+        </div>
+    </div>
+</div>
+
+<!-- === APPEL A L'ACTION (CTA) === -->
+<div class="bg-dark text-secondary px-4 py-5 text-center">
+    <div class="py-5">
+        <h1 class="display-5 fw-bold text-white">Prêt à partir ?</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="fs-5 mb-4">Rejoignez des milliers de clients satisfaits et prenez la route dès aujourd'hui.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-info btn-lg px-4 me-sm-3 fw-bold">Créer un compte</a>
+                <a asp-controller="Cars" asp-action="Index" class="btn btn-outline-light btn-lg px-4">Explorer le catalogue</a>
+            </div>
+        </div>
+    </div>
 </div>

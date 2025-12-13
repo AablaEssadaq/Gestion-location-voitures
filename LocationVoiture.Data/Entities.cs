@@ -63,10 +63,16 @@ namespace LocationVoiture.Data
         public DateTime DateDebut { get; set; }
         public DateTime DateFin { get; set; }
         public decimal PrixTotal { get; set; }
-        public string Statut { get; set; } // Changé en string pour correspondre facilement à la BDD
+        public string Statut { get; set; }
+
+        
+        public bool EstPaye { get; set; }
+        
+
         public int ClientId { get; set; }
         public int VoitureId { get; set; }
     }
+
 
     public class Paiement
     {

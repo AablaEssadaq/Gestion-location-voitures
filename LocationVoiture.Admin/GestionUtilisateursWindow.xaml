@@ -1,20 +1,30 @@
 ﻿<Window x:Class="LocationVoiture.Admin.GestionUtilisateursWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gestion des Utilisateurs" Height="500" Width="900"
+        Title="Gestion des Utilisateurs" Height="600" Width="1000"
         WindowStartupLocation="CenterScreen" Background="#F3F4F6">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- En-tête (0) -->
+            <RowDefinition Height="Auto"/>
+            <!-- Barre d'outils (1) -->
             <RowDefinition Height="*"/>
+            <!-- Liste (2) -->
+            <RowDefinition Height="Auto"/>
+            <!-- Pagination (3) -->
         </Grid.RowDefinitions>
 
-        <!-- En-tête -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Équipe &amp; Accès" FontSize="24" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
-            <Button Content="+ Nouvel Employé" HorizontalAlignment="Right" Click="BtnAjouter_Click"
-                    Height="35" Width="150" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+        <!-- 1. EN-TÊTE -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="🛡️ Équipe &amp; Accès" FontSize="24" FontWeight="Bold" Foreground="#1F2937"/>
+                <TextBlock Text=" | Administration" FontSize="16" Foreground="#6B7280" VerticalAlignment="Bottom" Margin="10,0,0,3"/>
+            </StackPanel>
+
+            <Button HorizontalAlignment="Right" Content="+ NOUVEL EMPLOYÉ" Click="BtnAjouter_Click"
+                    Height="40" Padding="20,0" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="6"/>
@@ -23,11 +33,56 @@
             </Button>
         </Grid>
 
-        <!-- Liste -->
-        <DataGrid Grid.Row="1" x:Name="UsersGrid" AutoGenerateColumns="False" 
-                  CanUserAddRows="False" IsReadOnly="True"
-                  Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="35">
+        <!-- 2. BARRE D'OUTILS -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,15" BorderBrush="#E5E7EB" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <!-- Recherche -->
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="200"/>
+                    <!-- Filtre Rôle -->
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Reset -->
+                </Grid.ColumnDefinitions>
 
+                <!-- Recherche -->
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="txtRecherche" Height="35" Padding="5" VerticalContentAlignment="Center"
+                             TextChanged="TxtRecherche_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                    <TextBlock Text="🔍 Nom, Prénom, Email..." IsHitTestVisible="False" 
+                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=txtRecherche}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Filtre Rôle -->
+                <ComboBox x:Name="cbFiltreRole" Grid.Column="2" Height="35" Background="#F9FAFB" SelectionChanged="CbFiltreRole_SelectionChanged">
+                    <ComboBoxItem Content="Tous les rôles" IsSelected="True"/>
+                    <ComboBoxItem Content="Admin"/>
+                    <ComboBoxItem Content="Employe"/>
+                </ComboBox>
+
+                <!-- Reset -->
+                <Button Grid.Column="4" Content="↺" Click="BtnReset_Click" 
+                        Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+            </Grid>
+        </Border>
+
+        <!-- 3. LISTE -->
+        <DataGrid Grid.Row="2" x:Name="UsersGrid" AutoGenerateColumns="False" 
+                  CanUserAddRows="False" IsReadOnly="True"
+                  Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
             <DataGrid.Resources>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Padding" Value="10"/>
@@ -44,25 +99,33 @@
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*"/>
                 <DataGridTextColumn Header="Rôle" Binding="{Binding Role}" Width="100"/>
 
-                <!-- Colonne Actions (Modifier / Supprimer) -->
                 <DataGridTemplateColumn Header="Actions" Width="160">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- Bouton MODIFIER -->
-                                <Button Content="Modifier" Click="BtnModifier_Click" 
+                                <Button Content="✏️" Click="BtnModifier_Click" 
                                         Background="#DBEAFE" Foreground="#1E40AF" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"/>
+                                        FontSize="12" Padding="8,5" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}" ToolTip="Modifier"/>
 
-                                <!-- Bouton SUPPRIMER -->
-                                <Button Content="Supprimer" Click="BtnSupprimer_Click" 
+                                <Button Content="🗑️" Click="BtnSupprimer_Click" 
                                         Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Cursor="Hand" Tag="{Binding Id}"/>
+                                        FontSize="12" Padding="8,5" Cursor="Hand" Tag="{Binding Id}" ToolTip="Supprimer"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <!-- 4. PAGINATION -->
+        <Border Grid.Row="3" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock x:Name="lblPaginationInfo" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
+                    <Button x:Name="btnPrev" Content="Précédent" Click="BtnPrev_Click" Width="100" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                    <Button x:Name="btnNext" Content="Suivant" Click="BtnNext_Click" Width="100" Height="30" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

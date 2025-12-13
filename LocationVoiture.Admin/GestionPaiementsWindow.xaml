@@ -1,0 +1,133 @@
+﻿<Window x:Class="LocationVoiture.Admin.GestionPaiementsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Historique des Paiements" Height="650" Width="1000"
+        WindowStartupLocation="CenterScreen" Background="#F3F4F6">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- En-tête -->
+            <RowDefinition Height="Auto"/>
+            <!-- Barre d'outils -->
+            <RowDefinition Height="*"/>
+            <!-- Liste -->
+            <RowDefinition Height="Auto"/>
+            <!-- Pagination -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. EN-TÊTE -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Journal de Caisse" FontSize="24" FontWeight="Bold" Foreground="#1F2937"/>
+            <TextBlock Text="Historique de tous les encaissements" FontSize="14" Foreground="#6B7280"/>
+        </StackPanel>
+
+        <!-- 2. BARRE D'OUTILS -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,15" BorderBrush="#E5E7EB" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <!-- Recherche -->
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="200"/>
+                    <!-- Filtre Méthode -->
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="150"/>
+                    <!-- Tri -->
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Reset -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Recherche -->
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="txtRecherche" Height="35" Padding="5" VerticalContentAlignment="Center"
+                             TextChanged="TxtRecherche_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                    <TextBlock Text="🔍 Client, Véhicule..." IsHitTestVisible="False" 
+                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=txtRecherche}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Filtre Méthode -->
+                <ComboBox x:Name="cbFiltreMethode" Grid.Column="2" Height="35" Background="#F9FAFB" SelectionChanged="CbFiltre_SelectionChanged">
+                    <ComboBoxItem Content="Toutes méthodes" IsSelected="True"/>
+                    <ComboBoxItem Content="Espèce"/>
+                    <ComboBoxItem Content="Carte Bancaire"/>
+                    <ComboBoxItem Content="Virement"/>
+                    <ComboBoxItem Content="Chèque"/>
+                </ComboBox>
+
+                <!-- Tri -->
+                <ComboBox x:Name="cbTri" Grid.Column="4" Height="35" Background="#F9FAFB" SelectionChanged="CbTri_SelectionChanged">
+                    <ComboBoxItem Content="Plus récents" Tag="p.DatePaiement DESC" IsSelected="True"/>
+                    <ComboBoxItem Content="Plus anciens" Tag="p.DatePaiement ASC"/>
+                    <ComboBoxItem Content="Montant croissant" Tag="p.Montant ASC"/>
+                    <ComboBoxItem Content="Montant décroissant" Tag="p.Montant DESC"/>
+                </ComboBox>
+
+                <!-- Reset -->
+                <Button Grid.Column="6" Content="↺" Click="BtnReset_Click" 
+                        Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+            </Grid>
+        </Border>
+
+        <!-- 3. LISTE -->
+        <DataGrid Grid.Row="2" x:Name="PaiementsGrid" AutoGenerateColumns="False" 
+                  CanUserAddRows="False" IsReadOnly="True"
+                  Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
+
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Padding" Value="10"/>
+                    <Setter Property="Background" Value="#F9FAFB"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                </Style>
+            </DataGrid.Resources>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding DatePaiement, StringFormat=dd/MM/yyyy HH:mm}" Width="140"/>
+                <DataGridTextColumn Header="Montant" Binding="{Binding Montant, StringFormat={}{0:N2} DH}" Width="100" FontWeight="Bold" Foreground="#059669"/>
+                <DataGridTextColumn Header="Méthode" Binding="{Binding Methode}" Width="120"/>
+
+                <DataGridTextColumn Header="Client" Binding="{Binding NomClient}" Width="*"/>
+                <DataGridTextColumn Header="Véhicule" Binding="{Binding ModeleVoiture}" Width="*"/>
+                <DataGridTextColumn Header="Ref. Location" Binding="{Binding LocationId, StringFormat={}LOC-{0}}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 4. PIED DE PAGE (Pagination & Total) -->
+        <Border Grid.Row="3" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Pagination -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnPrev" Content="" Click="BtnPrev_Click" Width="30" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                    <TextBlock x:Name="lblPaginationInfo" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="Gray"/>
+                    <Button x:Name="btnNext" Content="" Click="BtnNext_Click" Width="30" Height="30" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                </StackPanel>
+
+                <!-- Total -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="TOTAL AFFICHÉ :" FontSize="14" FontWeight="Bold" Foreground="#374151" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtTotalGeneral" Text="0 DH" FontSize="18" FontWeight="Bold" Foreground="#059669" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

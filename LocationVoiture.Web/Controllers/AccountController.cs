@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using LocationVoiture.Data; // Accès à vos modèles (Client) et DatabaseHelper
+using LocationVoiture.Data;
 using System.Data;
-using MySql.Data.MySqlClient; // Pour MySQL
+using MySql.Data.MySqlClient;
+using LocationVoiture.Web.Utilities; // IMPORTANT : Pour utiliser PasswordHelper
 
 namespace LocationVoiture.Web.Controllers
 {
@@ -14,34 +15,27 @@ namespace LocationVoiture.Web.Controllers
             db = new DatabaseHelper();
         }
 
-        // ==========================================
-        // PARTIE INSCRIPTION (REGISTER)
-        // ==========================================
-
-        // 1. Affiche la page d'inscription
+        // === INSCRIPTION ===
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // 2. Reçoit les données du formulaire
         [HttpPost]
         public IActionResult Register(Client client)
         {
-            // Vérification simple
             if (string.IsNullOrWhiteSpace(client.Nom) || string.IsNullOrWhiteSpace(client.Email) || string.IsNullOrWhiteSpace(client.MotDePasse))
             {
-                ViewBag.Error = "Veuillez remplir les champs obligatoires (*).";
+                ViewBag.Error = "Veuillez remplir les champs obligatoires.";
                 return View(client);
             }
 
             try
             {
-                // Vérifier si l'email existe déjà
+                // 1. Vérifier si l'email existe déjà
                 string checkQuery = "SELECT COUNT(*) FROM Clients WHERE Email = @email";
                 MySqlParameter[] pCheck = { new MySqlParameter("@email", client.Email) };
-
                 int count = Convert.ToInt32(db.ExecuteScalar(checkQuery, pCheck));
 
                 if (count > 0)
@@ -50,7 +44,10 @@ namespace LocationVoiture.Web.Controllers
                     return View(client);
                 }
 
-                // Insertion dans la base
+                // 2. HACHER LE MOT DE PASSE
+                string motDePasseHache = PasswordHelper.HashPassword(client.MotDePasse);
+
+                // 3. Insertion avec le mot de passe haché
                 string query = @"INSERT INTO Clients (Nom, Prenom, Email, Telephone, NumPermis, MotDePasse) 
                                  VALUES (@nom, @prenom, @email, @tel, @permis, @mdp)";
 
@@ -60,12 +57,11 @@ namespace LocationVoiture.Web.Controllers
                     new MySqlParameter("@email", client.Email),
                     new MySqlParameter("@tel", client.Telephone),
                     new MySqlParameter("@permis", client.NumPermis),
-                    new MySqlParameter("@mdp", client.MotDePasse)
+                    new MySqlParameter("@mdp", motDePasseHache) // On envoie le hash, pas le clair
                 };
 
                 db.ExecuteNonQuery(query, p);
 
-                // Succès : on redirige vers la page de connexion
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -75,49 +71,41 @@ namespace LocationVoiture.Web.Controllers
             }
         }
 
-        // ==========================================
-        // PARTIE CONNEXION (LOGIN)
-        // ==========================================
-
-        // 1. Affiche la page de connexion
+        // === CONNEXION ===
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // 2. Traite la connexion
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
             try
             {
-                // On cherche le client avec cet email et ce mot de passe
-                string query = "SELECT * FROM Clients WHERE Email = @email AND MotDePasse = @mdp";
-                MySqlParameter[] p = {
-                    new MySqlParameter("@email", email),
-                    new MySqlParameter("@mdp", password)
-                };
-
+                // 1. On récupère l'utilisateur par son Email UNIQUEMENT
+                string query = "SELECT * FROM Clients WHERE Email = @email";
+                MySqlParameter[] p = { new MySqlParameter("@email", email) };
                 DataTable dt = db.ExecuteQuery(query, p);
 
                 if (dt.Rows.Count > 0)
                 {
-                    // TROUVÉ ! On crée la session
                     DataRow row = dt.Rows[0];
+                    string storedHash = row["MotDePasse"].ToString();
 
-                    // On stocke l'ID et le Nom dans le navigateur du client (Session)
-                    HttpContext.Session.SetString("ClientId", row["Id"].ToString());
-                    HttpContext.Session.SetString("ClientNom", row["Prenom"].ToString() + " " + row["Nom"].ToString());
+                    // 2. On vérifie si le mot de passe saisi correspond au hash stocké
+                    if (PasswordHelper.VerifyPassword(password, storedHash))
+                    {
+                        // SUCCÈS
+                        HttpContext.Session.SetString("ClientId", row["Id"].ToString());
+                        HttpContext.Session.SetString("ClientNom", row["Prenom"].ToString() + " " + row["Nom"].ToString());
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
 
-                    // On renvoie vers l'accueil
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ViewBag.Error = "Email ou mot de passe incorrect.";
-                    return View();
-                }
+                // ECHEC (Soit email introuvable, soit mot de passe faux)
+                ViewBag.Error = "Email ou mot de passe incorrect.";
+                return View();
             }
             catch (Exception ex)
             {
@@ -126,12 +114,9 @@ namespace LocationVoiture.Web.Controllers
             }
         }
 
-        // ==========================================
-        // DÉCONNEXION
-        // ==========================================
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // On vide la session
+            HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
     }
