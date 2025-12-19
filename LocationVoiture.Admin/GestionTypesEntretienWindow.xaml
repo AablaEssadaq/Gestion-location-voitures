@@ -13,7 +13,6 @@
 
         <TextBlock Grid.Row="0" Text="⚙️ Configuration des Règles" FontSize="20" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,20"/>
 
-        <!-- Liste -->
         <DataGrid Grid.Row="1" x:Name="TypesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
                   Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
             <DataGrid.Columns>
@@ -33,7 +32,6 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Formulaire -->
         <Border Grid.Row="2" Background="White" Padding="15" Margin="0,20,0,0" CornerRadius="8">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <StackPanel Margin="0,0,10,0">

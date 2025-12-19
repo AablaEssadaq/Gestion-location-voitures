@@ -5,6 +5,9 @@ using System.Windows;
 using System.Windows.Controls;
 using LocationVoiture.Data;
 using MySql.Data.MySqlClient;
+using Microsoft.Win32;
+using ClosedXML.Excel;
+using System.Globalization;
 
 namespace LocationVoiture.Admin
 {
@@ -12,7 +15,6 @@ namespace LocationVoiture.Admin
     {
         private DatabaseHelper db;
 
-        // Pagination
         private int _currentPage = 1;
         private int _pageSize = 15;
         private int _totalRecords = 0;
@@ -29,7 +31,7 @@ namespace LocationVoiture.Admin
             ChargerPaiements();
         }
 
-        private void ChargerPaiements()
+        private void ChargerPaiements(bool loadAll = false)
         {
             if (!_isLoaded || db == null) return;
 
@@ -38,14 +40,12 @@ namespace LocationVoiture.Admin
                 string condition = "WHERE 1=1";
                 List<MySqlParameter> parameters = new List<MySqlParameter>();
 
-                // A. Recherche (Client, Voiture)
                 if (!string.IsNullOrWhiteSpace(txtRecherche.Text))
                 {
                     condition += " AND (c.Nom LIKE @s OR c.Prenom LIKE @s OR v.Marque LIKE @s OR v.Modele LIKE @s)";
                     parameters.Add(new MySqlParameter("@s", "%" + txtRecherche.Text + "%"));
                 }
 
-                // B. Filtre Méthode
                 if (cbFiltreMethode.SelectedIndex > 0)
                 {
                     string methode = (cbFiltreMethode.SelectedItem as ComboBoxItem).Content.ToString();
@@ -53,14 +53,12 @@ namespace LocationVoiture.Admin
                     parameters.Add(new MySqlParameter("@methode", methode));
                 }
 
-                // C. Tri
                 string orderBy = "p.DatePaiement DESC";
                 if (cbTri.SelectedItem is ComboBoxItem itemSort && itemSort.Tag != null)
                 {
                     orderBy = itemSort.Tag.ToString();
                 }
 
-                // D. Pagination (Count)
                 string countQuery = $@"SELECT COUNT(*) FROM Paiements p 
                                        JOIN Locations l ON p.LocationId = l.Id
                                        JOIN Clients c ON l.ClientId = c.Id
@@ -77,8 +75,8 @@ namespace LocationVoiture.Admin
                 btnPrev.IsEnabled = _currentPage > 1;
                 btnNext.IsEnabled = _currentPage < totalPages;
 
-                // E. Requête Finale
-                int offset = (_currentPage - 1) * _pageSize;
+                string limitOffset = loadAll ? "" : $"LIMIT {_pageSize} OFFSET {(_currentPage - 1) * _pageSize}";
+
                 string query = $@"
                     SELECT p.Id, p.Montant, p.DatePaiement, p.Methode, p.LocationId,
                            CONCAT(c.Prenom, ' ', c.Nom) AS NomClient,
@@ -89,13 +87,19 @@ namespace LocationVoiture.Admin
                     JOIN Voitures v ON l.VoitureId = v.Id
                     {condition}
                     ORDER BY {orderBy}
-                    LIMIT {_pageSize} OFFSET {offset}";
+                    {limitOffset}";
 
                 DataTable dt = db.ExecuteQuery(query, parameters.ToArray());
-                PaiementsGrid.ItemsSource = dt.DefaultView;
 
-                // F. Calcul du Total (Sur la sélection filtrée, pas juste la page)
-                // Pour avoir le vrai total filtré, on fait une petite requête SUM
+                if (!loadAll)
+                {
+                    PaiementsGrid.ItemsSource = dt.DefaultView;
+                }
+                else
+                {
+                    ExportPaiementsToXlsx(dt);
+                }
+
                 string sumQuery = $@"SELECT SUM(p.Montant) FROM Paiements p 
                                      JOIN Locations l ON p.LocationId = l.Id
                                      JOIN Clients c ON l.ClientId = c.Id
@@ -104,16 +108,91 @@ namespace LocationVoiture.Admin
 
                 object sumRes = db.ExecuteScalar(sumQuery, parameters.ToArray());
                 decimal total = (sumRes != DBNull.Value && sumRes != null) ? Convert.ToDecimal(sumRes) : 0;
-
                 txtTotalGeneral.Text = $"{total:N2} DH";
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erreur chargement : " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("Erreur chargement : " + ex.Message); }
         }
 
-        // --- EVENTS UI ---
+        private void BtnExporter_Click(object sender, RoutedEventArgs e) => ChargerPaiements(true);
+
+        private void ExportPaiementsToXlsx(DataTable dt)
+        {
+            try
+            {
+                SaveFileDialog sfd = new SaveFileDialog { Filter = "Excel (*.xlsx)|*.xlsx", FileName = "Journal_Caisse_" + DateTime.Now.ToString("yyyyMMdd") };
+                if (sfd.ShowDialog() == true)
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Paiements");
+                        string[] cols = { "LocationId", "Montant", "DatePaiement", "Methode", "NomClient", "ModeleVoiture" };
+
+                        for (int i = 0; i < cols.Length; i++) worksheet.Cell(1, i + 1).Value = cols[i];
+
+                        for (int r = 0; r < dt.Rows.Count; r++)
+                        {
+                            for (int c = 0; c < cols.Length; c++)
+                                worksheet.Cell(r + 2, c + 1).Value = dt.Rows[r][cols[c]].ToString();
+                        }
+
+                        worksheet.Columns().AdjustToContents();
+                        workbook.SaveAs(sfd.FileName);
+                    }
+                    MessageBox.Show("Exportation réussie !");
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Erreur export : " + ex.Message); }
+        }
+
+        private void BtnImporter_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog { Filter = "Excel (*.xlsx)|*.xlsx" };
+            if (ofd.ShowDialog() == true) ImportPaiementsFromXlsx(ofd.FileName);
+        }
+
+        private void ImportPaiementsFromXlsx(string filePath)
+        {
+            int success = 0, fail = 0;
+            try
+            {
+                using (var workbook = new XLWorkbook(filePath))
+                {
+                    var sheet = workbook.Worksheet(1);
+                    var rows = sheet.RangeUsed().RowsUsed();
+
+                    foreach (var row in rows)
+                    {
+                        if (row.RowNumber() == 1) continue;
+
+                        try
+                        {
+                            int locId = int.Parse(row.Cell(1).GetString());
+                            decimal montant = decimal.Parse(row.Cell(2).GetString().Replace(',', '.'), CultureInfo.InvariantCulture);
+                            DateTime dateP = DateTime.Parse(row.Cell(3).GetString());
+                            string methode = row.Cell(4).GetString();
+
+                            string query = "INSERT INTO Paiements (LocationId, Montant, DatePaiement, Methode) VALUES (@id, @m, @d, @meth)";
+                            MySqlParameter[] ps = {
+                                new MySqlParameter("@id", locId),
+                                new MySqlParameter("@m", montant),
+                                new MySqlParameter("@d", dateP),
+                                new MySqlParameter("@meth", methode)
+                            };
+
+                            db.ExecuteNonQuery(query, ps);
+                            db.ExecuteNonQuery("UPDATE Locations SET EstPaye = 1 WHERE Id = @id", new MySqlParameter[] { new MySqlParameter("@id", locId) });
+
+                            success++;
+                        }
+                        catch { fail++; }
+                    }
+                }
+                MessageBox.Show($"Import terminé : {success} ajoutés, {fail} échecs.");
+                ChargerPaiements();
+            }
+            catch (Exception ex) { MessageBox.Show("Erreur critique : " + ex.Message); }
+        }
+
         private void TxtRecherche_TextChanged(object sender, TextChangedEventArgs e) { _currentPage = 1; ChargerPaiements(); }
         private void CbFiltre_SelectionChanged(object sender, SelectionChangedEventArgs e) { _currentPage = 1; ChargerPaiements(); }
         private void CbTri_SelectionChanged(object sender, SelectionChangedEventArgs e) { ChargerPaiements(); }

@@ -31,7 +31,7 @@ namespace LocationVoiture.Admin
 
         private void BtnModifier_Click(object sender, RoutedEventArgs e)
         {
-            var row = ((Button)sender).Tag as DataRowView; // Attention : Tag="{Binding}" dans le XAML pour récupérer tout l'objet
+            var row = ((Button)sender).Tag as DataRowView; 
             if (row != null)
             {
                 _idModif = Convert.ToInt32(row["Id"]);
@@ -42,7 +42,6 @@ namespace LocationVoiture.Admin
             }
         }
 
-        // === NOUVEAU : SUPPRESSION ===
         private void BtnSupprimer_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Supprimer ce type d'entretien ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
@@ -53,7 +52,6 @@ namespace LocationVoiture.Admin
                     db.ExecuteNonQuery("DELETE FROM TypeEntretien WHERE Id = @id", new MySqlParameter[] { new MySqlParameter("@id", id) });
                     ChargerTypes();
 
-                    // Reset formulaire si on était en train de modifier celui qu'on supprime
                     if (_idModif == id) { _idModif = null; txtNom.Text = ""; txtKm.Text = ""; btnSave.Content = "Ajouter"; }
                 }
                 catch (Exception ex) { MessageBox.Show("Erreur : " + ex.Message); }

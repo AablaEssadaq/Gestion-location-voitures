@@ -2,7 +2,7 @@
 using LocationVoiture.Data;
 using System.Data;
 using MySql.Data.MySqlClient;
-using LocationVoiture.Web.Utilities; // IMPORTANT : Pour utiliser PasswordHelper
+using LocationVoiture.Web.Utilities; 
 
 namespace LocationVoiture.Web.Controllers
 {
@@ -15,7 +15,6 @@ namespace LocationVoiture.Web.Controllers
             db = new DatabaseHelper();
         }
 
-        // === INSCRIPTION ===
         [HttpGet]
         public IActionResult Register()
         {
@@ -33,7 +32,6 @@ namespace LocationVoiture.Web.Controllers
 
             try
             {
-                // 1. Vérifier si l'email existe déjà
                 string checkQuery = "SELECT COUNT(*) FROM Clients WHERE Email = @email";
                 MySqlParameter[] pCheck = { new MySqlParameter("@email", client.Email) };
                 int count = Convert.ToInt32(db.ExecuteScalar(checkQuery, pCheck));
@@ -44,10 +42,8 @@ namespace LocationVoiture.Web.Controllers
                     return View(client);
                 }
 
-                // 2. HACHER LE MOT DE PASSE
                 string motDePasseHache = PasswordHelper.HashPassword(client.MotDePasse);
 
-                // 3. Insertion avec le mot de passe haché
                 string query = @"INSERT INTO Clients (Nom, Prenom, Email, Telephone, NumPermis, MotDePasse) 
                                  VALUES (@nom, @prenom, @email, @tel, @permis, @mdp)";
 
@@ -57,7 +53,7 @@ namespace LocationVoiture.Web.Controllers
                     new MySqlParameter("@email", client.Email),
                     new MySqlParameter("@tel", client.Telephone),
                     new MySqlParameter("@permis", client.NumPermis),
-                    new MySqlParameter("@mdp", motDePasseHache) // On envoie le hash, pas le clair
+                    new MySqlParameter("@mdp", motDePasseHache) 
                 };
 
                 db.ExecuteNonQuery(query, p);
@@ -71,7 +67,6 @@ namespace LocationVoiture.Web.Controllers
             }
         }
 
-        // === CONNEXION ===
         [HttpGet]
         public IActionResult Login()
         {
@@ -83,7 +78,6 @@ namespace LocationVoiture.Web.Controllers
         {
             try
             {
-                // 1. On récupère l'utilisateur par son Email UNIQUEMENT
                 string query = "SELECT * FROM Clients WHERE Email = @email";
                 MySqlParameter[] p = { new MySqlParameter("@email", email) };
                 DataTable dt = db.ExecuteQuery(query, p);
@@ -93,17 +87,14 @@ namespace LocationVoiture.Web.Controllers
                     DataRow row = dt.Rows[0];
                     string storedHash = row["MotDePasse"].ToString();
 
-                    // 2. On vérifie si le mot de passe saisi correspond au hash stocké
                     if (PasswordHelper.VerifyPassword(password, storedHash))
                     {
-                        // SUCCÈS
                         HttpContext.Session.SetString("ClientId", row["Id"].ToString());
                         HttpContext.Session.SetString("ClientNom", row["Prenom"].ToString() + " " + row["Nom"].ToString());
                         return RedirectToAction("Index", "Home");
                     }
                 }
 
-                // ECHEC (Soit email introuvable, soit mot de passe faux)
                 ViewBag.Error = "Email ou mot de passe incorrect.";
                 return View();
             }

@@ -10,7 +10,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- En-tête -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="🔧 Maintenance &amp; Suivi" FontSize="24" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
 
@@ -26,40 +25,31 @@
             </StackPanel>
         </Grid>
 
-        <!-- Onglets -->
         <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent" SelectionChanged="TabControl_SelectionChanged">
 
-            <!-- ONGLET 1 : ALERTES (MAINTENANT AVEC OUTILS) -->
             <TabItem Header="⚠️ Alertes Maintenance" FontSize="14" FontWeight="SemiBold">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Outils -->
                         <RowDefinition Height="*"/>
-                        <!-- Liste -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Pagination -->
                     </Grid.RowDefinitions>
 
-                    <!-- BARRE D'OUTILS ALERTES -->
                     <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,10" BorderBrush="#E5E7EB" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <!-- Recherche -->
                                 <ColumnDefinition Width="15"/>
                                 <ColumnDefinition Width="200"/>
-                                <!-- Filtre Entretien -->
                                 <ColumnDefinition Width="15"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Reset -->
                             </Grid.ColumnDefinitions>
 
                             <Grid Grid.Column="0">
                                 <TextBox x:Name="txtRechercheAlertes" Height="35" Padding="5" VerticalContentAlignment="Center"
-                                         TextChanged="TxtRechercheAlertes_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                                             TextChanged="TxtRechercheAlertes_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
                                 <TextBlock Text="🔍 Véhicule, Matricule..." IsHitTestVisible="False" 
-                                           Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -74,12 +64,11 @@
                             </Grid>
 
                             <ComboBox x:Name="cbFiltreTypeAlerte" Grid.Column="2" Height="35" Background="#F9FAFB"
-                                      SelectionChanged="CbFiltreTypeAlerte_SelectionChanged">
-                                <!-- Rempli par le code -->
+                                            SelectionChanged="CbFiltreTypeAlerte_SelectionChanged">
                             </ComboBox>
 
                             <Button Grid.Column="4" Content="↺" Click="BtnResetAlertes_Click" 
-                                    Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+                                        Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
                         </Grid>
                     </Border>
 
@@ -102,7 +91,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <!-- PAGINATION ALERTES -->
                     <Border Grid.Row="2" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock x:Name="lblPaginationInfoAlertes" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
@@ -113,33 +101,28 @@
                 </Grid>
             </TabItem>
 
-            <!-- ONGLET 2 : HISTORIQUE -->
             <TabItem Header="📜 Historique Complet" FontSize="14" FontWeight="SemiBold">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Outils -->
                         <RowDefinition Height="*"/>
-                        <!-- Liste -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Pagination -->
                     </Grid.RowDefinitions>
 
-                    <!-- BARRE D'OUTILS HISTORIQUE -->
                     <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,10" BorderBrush="#E5E7EB" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <!-- Recherche -->
-                                <ColumnDefinition Width="15"/>
-                                <ColumnDefinition Width="200"/>
-                                <!-- Filtre Type -->
-                                <ColumnDefinition Width="15"/>
-                                <ColumnDefinition Width="150"/>
-                                <!-- Tri -->
-                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Reset -->
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <Grid Grid.Column="0">
@@ -162,7 +145,6 @@
 
                             <ComboBox x:Name="cbFiltreTypeHist" Grid.Column="2" Height="35" Background="#F9FAFB"
                                       SelectionChanged="CbFiltreTypeHist_SelectionChanged">
-                                <!-- Rempli par le code -->
                             </ComboBox>
 
                             <ComboBox x:Name="cbTriHist" Grid.Column="4" Height="35" Background="#F9FAFB" SelectionChanged="CbTriHist_SelectionChanged">
@@ -172,11 +154,34 @@
                                 <ComboBoxItem Content="Coût décroissant" Tag="e.Cout DESC"/>
                             </ComboBox>
 
-                            <Button Grid.Column="6" Content="↺" Click="BtnResetHist_Click" 
-                                    Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+                            <Button Grid.Column="6" Content="📥 Exporter" Click="BtnExporterHist_Click" Width="90" Height="35" 
+                                    Background="#059669" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+
+                            <Button Grid.Column="8" Content="📤 Importer" Click="BtnImporterHist_Click" Width="90" Height="35" 
+                                    Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+
+                            <Button Grid.Column="10" Content="↺" Click="BtnResetHist_Click" 
+                                    Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
                         </Grid>
                     </Border>
-
                     <DataGrid Grid.Row="1" x:Name="HistoriqueGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
                               Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
                         <DataGrid.Columns>
@@ -201,7 +206,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <!-- PAGINATION HISTORIQUE -->
                     <Border Grid.Row="2" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock x:Name="lblPaginationInfoHist" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>

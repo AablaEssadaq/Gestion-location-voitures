@@ -8,13 +8,11 @@ namespace LocationVoiture.Admin.Services
 {
     public class EmailService
     {
-        // ⚠️ CONFIGURATION SMTP (À REMPLACER PAR VOS VRAIS IDENTIFIANTS) ⚠️
         private string _smtpServer = "smtp.gmail.com";
         private int _port = 587;
         private string _senderEmail = "gestionlocationvoitures@gmail.com";
-        private string _password = "llid wwro mrdg ypak"; // Pas votre mot de passe Gmail, mais un "App Password"
+        private string _password = "llid wwro mrdg ypak";
 
-        // Ajout du paramètre 'pdfBytes' (nullable)
         public async Task EnvoyerEmailConfirmation(string destinataire, string nomClient, string voiture, string dates, decimal prix, byte[] pdfBytes = null)
         {
             try
@@ -37,7 +35,6 @@ namespace LocationVoiture.Admin.Services
                     L'équipe.
                 ";
 
-                // AJOUT DE LA PIÈCE JOINTE
                 if (pdfBytes != null)
                 {
                     mail.Attachments.Add(new Attachment(new MemoryStream(pdfBytes), "BonReservation.pdf", "application/pdf"));

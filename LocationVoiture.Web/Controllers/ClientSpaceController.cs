@@ -2,7 +2,7 @@
 using LocationVoiture.Data;
 using System.Data;
 using MySql.Data.MySqlClient;
-using LocationVoiture.Web.Utilities; // Pour PasswordHelper
+using LocationVoiture.Web.Utilities; 
 
 namespace LocationVoiture.Web.Controllers
 {
@@ -82,7 +82,6 @@ namespace LocationVoiture.Web.Controllers
                     Email = row["Email"].ToString(),
                     Telephone = row["Telephone"].ToString(),
                     NumPermis = row["NumPermis"].ToString(),
-                    // On ne pré-remplit PAS le mot de passe pour la sécurité
                 };
                 return View(c);
             }
@@ -97,7 +96,6 @@ namespace LocationVoiture.Web.Controllers
 
             try
             {
-                // Vérifier si le mot de passe a été changé
                 string query;
                 List<MySqlParameter> p = new List<MySqlParameter>
                 {
@@ -111,7 +109,6 @@ namespace LocationVoiture.Web.Controllers
 
                 if (!string.IsNullOrWhiteSpace(client.MotDePasse))
                 {
-                    // Si un nouveau mot de passe est saisi, on le hache et on met à jour
                     query = @"UPDATE Clients SET 
                               Nom=@nom, Prenom=@prenom, Email=@email, 
                               Telephone=@tel, NumPermis=@permis, MotDePasse=@mdp 
@@ -122,7 +119,6 @@ namespace LocationVoiture.Web.Controllers
                 }
                 else
                 {
-                    // Sinon on ne touche pas au mot de passe
                     query = @"UPDATE Clients SET 
                               Nom=@nom, Prenom=@prenom, Email=@email, 
                               Telephone=@tel, NumPermis=@permis 

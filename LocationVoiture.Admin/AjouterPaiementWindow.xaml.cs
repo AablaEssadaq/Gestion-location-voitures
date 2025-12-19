@@ -17,15 +17,13 @@ namespace LocationVoiture.Admin
             db = new DatabaseHelper();
             _locationId = locationId;
 
-            // Pré-remplissage
             lblInfo.Text = $"Règlement pour la location #{locationId}";
-            txtMontant.Text = montantTotal.ToString("0.00").Replace(",", "."); // Format propre
+            txtMontant.Text = montantTotal.ToString("0.00").Replace(",", "."); 
             dpDate.SelectedDate = DateTime.Now;
         }
 
         private void BtnValider_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Validation basique
             if (string.IsNullOrWhiteSpace(txtMontant.Text) || dpDate.SelectedDate == null)
             {
                 MessageBox.Show("Veuillez remplir le montant et la date.");
@@ -48,7 +46,7 @@ namespace LocationVoiture.Admin
                                  VALUES (@montant, @date, @methode, @locId)";
 
                 MySqlParameter[] p = {
-            new MySqlParameter("@montant", montantFinal), // Plus de decimal.Parse ici !
+            new MySqlParameter("@montant", montantFinal),
             new MySqlParameter("@date", dpDate.SelectedDate.Value),
             new MySqlParameter("@methode", cbMethode.Text),
             new MySqlParameter("@locId", _locationId)
@@ -60,6 +58,7 @@ namespace LocationVoiture.Admin
                 db.ExecuteNonQuery(queryUpdateLoc, new MySqlParameter[] { new MySqlParameter("@id", _locationId) });
 
                 MessageBox.Show("Paiement enregistré avec succès !");
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex)

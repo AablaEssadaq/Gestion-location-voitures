@@ -3,7 +3,7 @@ using System.Data;
 using System.Windows;
 using LocationVoiture.Data;
 using MySql.Data.MySqlClient;
-using LocationVoiture.Admin.Utilities; // Pour PasswordHelper
+using LocationVoiture.Admin.Utilities;
 
 namespace LocationVoiture.Admin
 {
@@ -42,8 +42,6 @@ namespace LocationVoiture.Admin
                     txtEmail.Text = row["Email"].ToString();
                     cbRole.Text = row["Role"].ToString();
 
-                    // On ne charge PAS le mot de passe hashé dans la case texte pour sécurité.
-                    // On laisse vide, si l'admin veut le changer il tape un nouveau.
                     txtMdp.Password = "";
                 }
             }
@@ -55,7 +53,6 @@ namespace LocationVoiture.Admin
 
         private void BtnEnregistrer_Click(object sender, RoutedEventArgs e)
         {
-            // Validation : Le mot de passe est obligatoire SEULEMENT en création
             if (string.IsNullOrWhiteSpace(txtNom.Text) || string.IsNullOrWhiteSpace(txtEmail.Text))
             {
                 MessageBox.Show("Merci de remplir Nom et Email.");
@@ -79,28 +76,23 @@ namespace LocationVoiture.Admin
                     new MySqlParameter("@role", cbRole.Text)
                 };
 
-                // CAS 1 : AJOUT
                 if (_userIdToEdit == null)
                 {
-                    // Hachage obligatoire
                     string mdpHache = PasswordHelper.HashPassword(txtMdp.Password);
 
                     query = "INSERT INTO Utilisateurs (Nom, Prenom, Email, MotDePasse, Role) VALUES (@nom, @prenom, @email, @mdp, @role)";
                     p.Add(new MySqlParameter("@mdp", mdpHache));
                 }
-                // CAS 2 : MODIFICATION
                 else
                 {
                     p.Add(new MySqlParameter("@id", _userIdToEdit));
 
-                    // Si le champ mot de passe est vide, on ne le change pas
                     if (string.IsNullOrWhiteSpace(txtMdp.Password))
                     {
                         query = "UPDATE Utilisateurs SET Nom=@nom, Prenom=@prenom, Email=@email, Role=@role WHERE Id=@id";
                     }
                     else
                     {
-                        // Sinon on hache le nouveau mot de passe
                         string mdpHache = PasswordHelper.HashPassword(txtMdp.Password);
                         p.Add(new MySqlParameter("@mdp", mdpHache));
                         query = "UPDATE Utilisateurs SET Nom=@nom, Prenom=@prenom, Email=@email, Role=@role, MotDePasse=@mdp WHERE Id=@id";
@@ -110,6 +102,7 @@ namespace LocationVoiture.Admin
                 db.ExecuteNonQuery(query, p.ToArray());
 
                 MessageBox.Show("Utilisateur enregistré avec succès !");
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex)

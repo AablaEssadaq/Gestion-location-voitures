@@ -7,41 +7,33 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Titre (0) -->
             <RowDefinition Height="Auto"/>
-            <!-- Barre d'outils (1) -->
             <RowDefinition Height="*"/>
-            <!-- Liste (2) -->
             <RowDefinition Height="Auto"/>
-            <!-- Pagination (3) -->
         </Grid.RowDefinitions>
 
-        <!-- 1. TITRE -->
         <TextBlock Grid.Row="0" Text="Gestion des Réservations" FontSize="24" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,15"/>
 
-        <!-- 2. BARRE D'OUTILS -->
         <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,15" BorderBrush="#E5E7EB" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <!-- Recherche -->
-                    <ColumnDefinition Width="15"/>
-                    <ColumnDefinition Width="150"/>
-                    <!-- Filtre Statut -->
-                    <ColumnDefinition Width="15"/>
-                    <ColumnDefinition Width="150"/>
-                    <!-- Filtre Paiement -->
-                    <ColumnDefinition Width="15"/>
-                    <ColumnDefinition Width="150"/>
-                    <!-- Tri -->
-                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Reset -->
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Recherche -->
                 <Grid Grid.Column="0">
-                    <TextBox x:Name="txtRecherche" Height="35" Padding="5" VerticalContentAlignment="Center"
+                    <TextBox x:Name="txtRecherche" Height="35" Padding="30,5,5,5" VerticalContentAlignment="Center"
                              TextChanged="TxtRecherche_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
                     <TextBlock Text="🔍 Client, Véhicule..." IsHitTestVisible="False" 
                                Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
@@ -58,7 +50,6 @@
                     </TextBlock>
                 </Grid>
 
-                <!-- Filtre Statut -->
                 <ComboBox x:Name="cbFiltreStatut" Grid.Column="2" Height="35" SelectionChanged="CbFiltre_SelectionChanged" Background="#F9FAFB">
                     <ComboBoxItem Content="Tous statuts" IsSelected="True"/>
                     <ComboBoxItem Content="En Attente"/>
@@ -67,14 +58,12 @@
                     <ComboBoxItem Content="Terminée"/>
                 </ComboBox>
 
-                <!-- Filtre Paiement -->
                 <ComboBox x:Name="cbFiltrePaiement" Grid.Column="4" Height="35" SelectionChanged="CbFiltre_SelectionChanged" Background="#F9FAFB">
                     <ComboBoxItem Content="Tous paiements" Tag="-1" IsSelected="True"/>
                     <ComboBoxItem Content="Payés" Tag="1"/>
                     <ComboBoxItem Content="Non payés" Tag="0"/>
                 </ComboBox>
 
-                <!-- Tri -->
                 <ComboBox x:Name="cbTri" Grid.Column="6" Height="35" SelectionChanged="CbTri_SelectionChanged" Background="#F9FAFB">
                     <ComboBoxItem Content="Plus récents" Tag="l.Id DESC" IsSelected="True"/>
                     <ComboBoxItem Content="Plus anciens" Tag="l.Id ASC"/>
@@ -82,13 +71,28 @@
                     <ComboBoxItem Content="Prix décroissant" Tag="l.PrixTotal DESC"/>
                 </ComboBox>
 
-                <!-- Reset -->
-                <Button Grid.Column="8" Content="↺" Click="BtnReset_Click" 
-                        Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563" ToolTip="Réinitialiser"/>
+                <Button Grid.Column="8" Content="📥 Exporter" Click="BtnExporter_Click" Padding="10,0" Height="35" 
+                        Background="#059669" Foreground="White" BorderThickness="0" FontWeight="SemiBold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="10" Content="📤 Importer" Click="BtnImporter_Click" Padding="10,0" Height="35" 
+                        Background="#2563EB" Foreground="White" BorderThickness="0" FontWeight="SemiBold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="12" Content="Reset ↺" Click="BtnReset_Click" Padding="10,0" Height="35" 
+                        Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
             </Grid>
         </Border>
-
-        <!-- 3. LISTE DES LOCATIONS -->
         <DataGrid Grid.Row="2" x:Name="LocationsGrid" AutoGenerateColumns="False" 
                   CanUserAddRows="False" IsReadOnly="True"
                   Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="45">
@@ -128,7 +132,6 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- 4. PAGINATION -->
         <Border Grid.Row="3" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

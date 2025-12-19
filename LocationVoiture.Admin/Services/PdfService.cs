@@ -9,8 +9,7 @@ namespace LocationVoiture.Admin.Services
 {
     public class PdfService
     {
-        // ⚠️ CHANGEZ CE PORT SELON VOTRE CONFIGURATION (Voir barre d'adresse du navigateur quand le site est lancé)
-        private const string BaseUrl = "https://localhost:56755";
+        private const string BaseUrl = "https://localhost:60000";
 
         public PdfService()
         {
@@ -19,8 +18,7 @@ namespace LocationVoiture.Admin.Services
 
         public byte[] GenererBonReservation(int idLocation, string nomClient, string voiture, DateTime debut, DateTime fin, decimal prix)
         {
-            // 1. GÉNÉRER L'URL POUR LE QR CODE
-            // Cela crée un lien cliquable/scannable vers la page de détails
+            //GÉNÉRER L'URL POUR LE QR CODE
             string urlScan = $"{BaseUrl}/Booking/Details/{idLocation}";
 
             byte[] qrCodeImage = GenererQrCode(urlScan);
@@ -72,7 +70,6 @@ namespace LocationVoiture.Admin.Services
                                 table.Cell().Padding(5).Text($"{prix} DH").Bold().FontColor(Colors.Green.Medium);
                             });
 
-                            // QR CODE AVEC INSTRUCTION
                             x.Item().AlignRight().Column(col =>
                             {
                                 col.Item().Element(c => c.Height(100).Width(100).Image(qrCodeImage));

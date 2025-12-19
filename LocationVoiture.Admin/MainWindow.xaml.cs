@@ -6,6 +6,12 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using LocationVoiture.Data;
 using MySql.Data.MySqlClient;
+using Microsoft.Win32;
+using System.IO;
+using System.Text;
+using System.Globalization; 
+
+using ClosedXML.Excel;
 
 namespace LocationVoiture.Admin
 {
@@ -13,22 +19,19 @@ namespace LocationVoiture.Admin
     {
         private DatabaseHelper db;
 
-        // Variables pour la pagination
         private int _currentPage = 1;
         private int _pageSize = 10;
         private int _totalRecords = 0;
-        private bool _isLoaded = false; // Sécurité pour éviter les appels trop tôt
+        private bool _isLoaded = false;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // CORRECTION : Instancier db EN PREMIER
             db = new DatabaseHelper();
 
             ChargerFiltresCategories();
 
-            // On marque que le chargement initial est fini
             _isLoaded = true;
 
             ChargerVoitures();
@@ -50,9 +53,8 @@ namespace LocationVoiture.Admin
             catch { }
         }
 
-        private void ChargerVoitures()
+        private void ChargerVoitures(bool loadAll = false)
         {
-            // Sécurité : Si la fenêtre n'est pas encore prête, on ne fait rien
             if (!_isLoaded) return;
 
             try
@@ -92,17 +94,18 @@ namespace LocationVoiture.Admin
                 btnPrev.IsEnabled = _currentPage > 1;
                 btnNext.IsEnabled = _currentPage < totalPages;
 
-                int offset = (_currentPage - 1) * _pageSize;
+                string limitOffset = loadAll ? "" : $"LIMIT {_pageSize} OFFSET {(_currentPage - 1) * _pageSize}";
 
                 string query = $@"
                     SELECT v.Id, v.Matricule, v.Marque, v.Modele, c.Libelle as Categorie, 
-                           v.PrixParJour, v.EstDisponible, 
-                           v.KilometrageActuel, v.KmDernierEntretien
+                            v.PrixParJour, v.EstDisponible, 
+                            v.KilometrageActuel, v.KmDernierEntretien,
+                            v.CategorieId -- Ajout pour l'import si besoin de l'ID
                     FROM Voitures v
                     INNER JOIN Categories c ON v.CategorieId = c.Id
                     {condition}
                     ORDER BY {orderBy}
-                    LIMIT {_pageSize} OFFSET {offset}";
+                    {limitOffset}";
 
                 DataTable dt = db.ExecuteQuery(query, parameters.ToArray());
 
@@ -114,7 +117,14 @@ namespace LocationVoiture.Admin
                     CalculerEntretien(row);
                 }
 
-                MyDataGrid.ItemsSource = dt.DefaultView;
+                if (!loadAll)
+                {
+                    MyDataGrid.ItemsSource = dt.DefaultView;
+                }
+                else
+                {
+                    ExportToXlsx(dt);
+                }
             }
             catch (Exception ex)
             {
@@ -142,16 +152,16 @@ namespace LocationVoiture.Admin
             int minReste = Math.Min(resteVidange, Math.Min(resteFreins, resteCourroie));
 
             string prochainEntretien = "À jour";
-            string couleur = "#E6FFFA";
+            string couleur = "Transparent";
 
             if (minReste == resteVidange) prochainEntretien = "Vidange";
             else if (minReste == resteFreins) prochainEntretien = "Plaquettes";
             else if (minReste == resteCourroie) prochainEntretien = "Courroie";
 
-            if (minReste <= 500) { couleur = "#FFCCCC"; prochainEntretien += " (URGENT)"; }
-            else if (minReste <= 2000) { couleur = "#FFF4CC"; }
+            if (minReste <= 500) { couleur = "#f21b1b"; prochainEntretien += " (URGENT)"; }
+            else if (minReste <= 2000) { couleur = "#ebd234"; }
 
-            if (minReste > 9000) { prochainEntretien = "À jour"; couleur = "Transparent"; }
+            if (minReste > 9000) { prochainEntretien = "À jour"; couleur = "#069425"; }
 
             row["NomProchainEntretien"] = prochainEntretien;
             row["CouleurAlerte"] = couleur;
@@ -168,23 +178,199 @@ namespace LocationVoiture.Admin
             catch { return 0; }
         }
 
+
+        private void BtnExporter_Click(object sender, RoutedEventArgs e)
+        {
+            ChargerVoitures(true);
+        }
+
+        private void ExportToXlsx(DataTable dt)
+        {
+            try
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Fichier Excel (*.xlsx)|*.xlsx";
+                saveFileDialog.FileName = "export_vehicules_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx";
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        DataTable dtExport = new DataTable("Voitures");
+                        string[] exportColumns = { "Matricule", "Marque", "Modele", "Categorie", "PrixParJour", "EstDisponible", "KilometrageActuel", "KmDernierEntretien" };
+
+                        foreach (string colName in exportColumns)
+                        {
+                            dtExport.Columns.Add(colName, dt.Columns[colName].DataType);
+                        }
+
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            DataRow newRow = dtExport.NewRow();
+                            foreach (string colName in exportColumns)
+                            {
+                                newRow[colName] = row[colName];
+                            }
+                            dtExport.Rows.Add(newRow);
+                        }
+
+                        var worksheet = workbook.Worksheets.Add(dtExport, "Liste des Véhicules");
+
+                        worksheet.Range(1, 1, 1, exportColumns.Length).Style.Font.Bold = true;
+                        worksheet.Range(1, 1, 1, exportColumns.Length).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                        worksheet.Columns().AdjustToContents();
+
+                        workbook.SaveAs(saveFileDialog.FileName);
+                    }
+
+                    MessageBox.Show("Exportation réussie !");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors de l'exportation XLSX : " + ex.Message, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private void BtnImporter_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Fichier Excel (*.xlsx)|*.xlsx";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                if (MessageBox.Show("Attention: L'importation va ajouter de nouveaux véhicules à la base de données. Continuer ?", "Confirmation d'Importation", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    ImportFromXlsx(openFileDialog.FileName);
+                }
+            }
+        }
+
+        private void ImportFromXlsx(string filePath)
+        {
+            int importedCount = 0;
+            int failedCount = 0;
+
+            List<string> errorDetails = new List<string>();
+
+            try
+            {
+                using (var workbook = new XLWorkbook(filePath))
+                {
+                    var worksheet = workbook.Worksheet(1);
+
+                    for (int row = 2; row <= worksheet.LastRowUsed().RowNumber(); row++)
+                    {
+                        int currentRow = row;
+                        string currentMatricule = "N/A";
+
+                        try
+                        {
+
+                            string matricule = worksheet.Cell(currentRow, 1).GetString().Trim();
+                            currentMatricule = matricule;
+
+                            string marque = worksheet.Cell(currentRow, 2).GetString().Trim();
+                            string modele = worksheet.Cell(currentRow, 3).GetString().Trim();
+                            string libelleCategorie = worksheet.Cell(currentRow, 4).GetString().Trim();
+
+                            string prixStr = worksheet.Cell(currentRow, 5).GetString().Replace(',', '.').Trim();
+                            double prixParJour = 0;
+                            if (!string.IsNullOrWhiteSpace(prixStr))
+                            {
+                                double.TryParse(prixStr, NumberStyles.Any, CultureInfo.InvariantCulture, out prixParJour);
+                            }
+
+                            string dispoStr = worksheet.Cell(currentRow, 6).GetString().Trim();
+                            bool estDisponible = dispoStr.Equals("true", StringComparison.OrdinalIgnoreCase) || dispoStr == "1" || dispoStr.Equals("oui", StringComparison.OrdinalIgnoreCase);
+
+                            string kmStr = worksheet.Cell(currentRow, 7).GetString().Trim();
+                            int kilometrageActuel = 0;
+                            if (!string.IsNullOrWhiteSpace(kmStr))
+                            {
+                                int.TryParse(kmStr, out kilometrageActuel);
+                            }
+
+
+                            object catIdObj = db.ExecuteScalar("SELECT Id FROM Categories WHERE Libelle = @libelle",
+                                new MySqlParameter[] { new MySqlParameter("@libelle", libelleCategorie) });
+
+                            if (catIdObj == null || catIdObj == DBNull.Value)
+                            {
+                                failedCount++;
+                                errorDetails.Add($"Ligne {currentRow} ({matricule}): Catégorie non trouvée dans la BDD pour '{libelleCategorie}'. Vérifiez l'orthographe.");
+                                continue;
+                            }
+                            int categorieId = Convert.ToInt32(catIdObj);
+
+                            string query = @"INSERT INTO Voitures 
+                                (Matricule, Marque, Modele, CategorieId, PrixParJour, EstDisponible, KilometrageActuel, KmDernierEntretien)
+                                VALUES (@mat, @mar, @mod, @catId, @prix, @dispo, @kmActuel, @kmActuel)";
+
+                            MySqlParameter[] parameters = new MySqlParameter[]
+                            {
+                                new MySqlParameter("@mat", matricule),
+                                new MySqlParameter("@mar", marque),
+                                new MySqlParameter("@mod", modele),
+                                new MySqlParameter("@catId", categorieId),
+                                new MySqlParameter("@prix", prixParJour),
+                                new MySqlParameter("@dispo", estDisponible),
+                                new MySqlParameter("@kmActuel", kilometrageActuel)
+                            };
+
+                            db.ExecuteNonQuery(query, parameters);
+                            importedCount++;
+                        }
+                        catch (Exception innerEx)
+                        {
+                            failedCount++;
+                            errorDetails.Add($"Ligne {currentRow} ({currentMatricule}): Erreur de format de données ou de base de données. Détail : {innerEx.Message}");
+                        }
+                    }
+                }
+
+                string finalMessage = $"Importation terminée : {importedCount} véhicules ajoutés, {failedCount} lignes ignorées.";
+
+                if (failedCount > 0)
+                {
+                    finalMessage += "\n\n❌ Détails des échecs :\n" + string.Join("\n", errorDetails);
+                    MessageBox.Show(finalMessage, "Importation XLSX - Avec Erreurs", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(finalMessage, "Importation XLSX", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                ChargerVoitures();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur critique lors de la lecture du fichier XLSX : " + ex.Message, "Erreur Importation", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+
         private void TxtRecherche_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_isLoaded) return; // Sécurité
+            if (!_isLoaded) return;
             _currentPage = 1;
             ChargerVoitures();
         }
 
         private void CbFiltre_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isLoaded) return; // Sécurité
+            if (!_isLoaded) return;
             _currentPage = 1;
             ChargerVoitures();
         }
 
         private void CbTri_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isLoaded) return; // Sécurité
+            if (!_isLoaded) return;
             ChargerVoitures();
         }
 
@@ -210,16 +396,28 @@ namespace LocationVoiture.Admin
 
         private void BtnAjouter_Click(object sender, RoutedEventArgs e)
         {
-            AjouterVoitureWindow w = new AjouterVoitureWindow();
-            w.ShowDialog();
-            ChargerVoitures();
+           
+            AjouterVoitureWindow fenetreAjout = new AjouterVoitureWindow();
+
+            if (fenetreAjout.ShowDialog() == true)
+            {
+                ChargerVoitures();
+            }
         }
 
         private void BtnModifier_Click(object sender, RoutedEventArgs e)
         {
-            int id = Convert.ToInt32(((Button)sender).Tag);
-            new AjouterVoitureWindow(id).ShowDialog();
-            ChargerVoitures();
+            if (sender is Button btn && btn.Tag != null)
+            {
+                int voitureId = Convert.ToInt32(btn.Tag);
+
+                AjouterVoitureWindow fenetreModif = new AjouterVoitureWindow(voitureId);
+
+                if (fenetreModif.ShowDialog() == true)
+                {
+                    ChargerVoitures();
+                }
+            }
         }
 
         private void BtnSupprimer_Click(object sender, RoutedEventArgs e)

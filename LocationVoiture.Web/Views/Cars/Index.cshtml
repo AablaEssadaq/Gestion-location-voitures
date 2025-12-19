@@ -7,7 +7,7 @@
     int totalPages = ViewBag.TotalPages ?? 1;
     string currentSearch = ViewBag.CurrentSearch as string;
     int? currentCat = ViewBag.CurrentCategory as int?;
-    string currentBrand = ViewBag.CurrentBrand as string; // NOUVEAU
+    string currentBrand = ViewBag.CurrentBrand as string; 
 }
 
 <div class="text-center mb-5">
@@ -15,12 +15,10 @@
     <p class="lead text-muted">Trouvez le véhicule parfait pour votre besoin.</p>
 </div>
 
-<!-- BARRE DE RECHERCHE ET FILTRES -->
 <div class="card shadow-sm mb-5 border-0 bg-light">
     <div class="card-body p-4">
         <form method="get" asp-action="Index" class="row g-3 justify-content-center align-items-end">
 
-            <!-- Recherche Texte -->
             <div class="col-md-3">
                 <label class="form-label fw-bold small text-muted">Recherche</label>
                 <div class="input-group">
@@ -29,7 +27,6 @@
                 </div>
             </div>
 
-            <!-- Filtre Marque (NOUVEAU) -->
             <div class="col-md-3">
                 <label class="form-label fw-bold small text-muted">Marque</label>
                 <select name="brand" class="form-select">
@@ -51,7 +48,6 @@
                 </select>
             </div>
 
-            <!-- Filtre Catégorie -->
             <div class="col-md-3">
                 <label class="form-label fw-bold small text-muted">Catégorie</label>
                 <select name="categoryId" class="form-select">
@@ -74,7 +70,6 @@
                 </select>
             </div>
 
-            <!-- Boutons -->
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary w-100 fw-bold">Filtrer</button>
                 <a asp-action="Index" class="btn btn-outline-secondary" title="Réinitialiser">↺</a>
@@ -83,7 +78,6 @@
     </div>
 </div>
 
-<!-- LISTE DES VOITURES -->
 @if (Model.Rows.Count == 0)
 {
     <div class="alert alert-info text-center py-5">
@@ -153,21 +147,18 @@ else
         }
     </div>
 
-    <!-- PAGINATION -->
     @if (totalPages > 1)
     {
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
-                <!-- Précédent -->
                 <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                     <a class="page-link" asp-action="Index"
                        asp-route-page="@(currentPage - 1)"
                        asp-route-searchString="@currentSearch"
                        asp-route-categoryId="@currentCat"
-                       asp-route-brand="@currentBrand">Précédent</a> <!-- Ajout asp-route-brand -->
+                       asp-route-brand="@currentBrand">Précédent</a> 
                 </li>
 
-                <!-- Numéros -->
                 @for (int i = 1; i <= totalPages; i++)
                 {
                     <li class="page-item @(i == currentPage ? "active" : "")">
@@ -175,17 +166,16 @@ else
                            asp-route-page="@i"
                            asp-route-searchString="@currentSearch"
                            asp-route-categoryId="@currentCat"
-                           asp-route-brand="@currentBrand">@i</a> <!-- Ajout asp-route-brand -->
+                           asp-route-brand="@currentBrand">@i</a> 
                     </li>
                 }
 
-                <!-- Suivant -->
                 <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
                     <a class="page-link" asp-action="Index"
                        asp-route-page="@(currentPage + 1)"
                        asp-route-searchString="@currentSearch"
                        asp-route-categoryId="@currentCat"
-                       asp-route-brand="@currentBrand">Suivant</a> <!-- Ajout asp-route-brand -->
+                       asp-route-brand="@currentBrand">Suivant</a> 
                 </li>
             </ul>
         </nav>

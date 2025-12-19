@@ -12,18 +12,14 @@
         <StackPanel Margin="20">
             <TextBlock Text="Encaisser un Paiement" FontSize="20" FontWeight="Bold" Foreground="#1F2937" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-            <!-- Info Location -->
             <TextBlock x:Name="lblInfo" Text="Location #..." Foreground="#6B7280" Margin="0,0,0,15" HorizontalAlignment="Center"/>
 
-            <!-- Montant -->
             <TextBlock Text="Montant (DH)" FontWeight="SemiBold" Foreground="#4B5563"/>
             <TextBox x:Name="txtMontant" Height="35" Padding="5" Margin="0,0,0,15" FontWeight="Bold"/>
 
-            <!-- Date -->
             <TextBlock Text="Date du paiement" FontWeight="SemiBold" Foreground="#4B5563"/>
             <DatePicker x:Name="dpDate" Height="35" Margin="0,0,0,15"/>
 
-            <!-- Méthode -->
             <TextBlock Text="Mode de règlement" FontWeight="SemiBold" Foreground="#4B5563"/>
             <ComboBox x:Name="cbMethode" Height="35" Padding="5" Margin="0,0,0,25">
                 <ComboBoxItem Content="Espèce" IsSelected="True"/>
@@ -32,7 +28,6 @@
                 <ComboBoxItem Content="Chèque"/>
             </ComboBox>
 
-            <!-- Boutons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Annuler" Click="BtnAnnuler_Click" 
                         Background="Transparent" BorderBrush="#D1D5DB" BorderThickness="1" 

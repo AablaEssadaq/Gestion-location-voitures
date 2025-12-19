@@ -61,8 +61,6 @@ namespace LocationVoiture.Admin
                     cbCategorie.SelectedValue = row["CategorieId"];
                     cbCarburant.Text = row["Carburant"].ToString();
 
-                    // GESTION CHECKBOX DISPONIBILITÉ
-                    // Si EstDisponible == 1 (True), on coche. Sinon on décoche.
                     bool estDispo = Convert.ToBoolean(row["EstDisponible"]);
                     chkDisponible.IsChecked = estDispo;
 
@@ -97,8 +95,7 @@ namespace LocationVoiture.Admin
                     cheminFinal = "/images/" + nom;
                 }
 
-                // RECUPERER LA VALEUR DE LA CHECKBOX
-                bool estDispo = chkDisponible.IsChecked == true; // True si coché, False si décoché
+                bool estDispo = chkDisponible.IsChecked == true; 
 
                 string query;
                 MySqlParameter[] p;
@@ -117,7 +114,7 @@ namespace LocationVoiture.Admin
                         new MySqlParameter("@prix", decimal.Parse(txtPrix.Text)),
                         new MySqlParameter("@img", (object)cheminFinal ?? DBNull.Value),
                         new MySqlParameter("@km", int.Parse(txtKm.Text)),
-                        new MySqlParameter("@dispo", estDispo) // On envoie le booléen
+                        new MySqlParameter("@dispo", estDispo) 
                     };
                 }
                 else
@@ -137,13 +134,14 @@ namespace LocationVoiture.Admin
                         new MySqlParameter("@prix", decimal.Parse(txtPrix.Text)),
                         new MySqlParameter("@img", (object)cheminFinal ?? DBNull.Value),
                         new MySqlParameter("@km", int.Parse(txtKm.Text)),
-                        new MySqlParameter("@dispo", estDispo), // On envoie le booléen
+                        new MySqlParameter("@dispo", estDispo),
                         new MySqlParameter("@id", _idVoitureModif)
                     };
                 }
 
                 db.ExecuteNonQuery(query, p);
                 MessageBox.Show("Enregistré avec succès !");
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex) { MessageBox.Show("Erreur : " + ex.Message); }

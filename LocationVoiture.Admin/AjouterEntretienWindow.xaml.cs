@@ -12,7 +12,6 @@ namespace LocationVoiture.Admin
         private DatabaseHelper db;
         private int? _idEntretienModif = null;
 
-        // Constructeur adapté : accepte un ID voiture (pour ajout) OU un ID entretien (pour modif)
         public AjouterEntretienWindow(int idVoiturePreselect = 0, int idEntretienModif = 0)
         {
             InitializeComponent();
@@ -54,7 +53,6 @@ namespace LocationVoiture.Admin
             catch { }
         }
 
-        // Charge les données pour modification
         private void ChargerEntretienExistant(int id)
         {
             try
@@ -89,7 +87,7 @@ namespace LocationVoiture.Admin
                 string query;
                 MySqlParameter[] p;
 
-                if (_idEntretienModif == null) // INSERT
+                if (_idEntretienModif == null)
                 {
                     query = @"INSERT INTO Entretiens (DateEntretien, TypeEntretien, Kilometrage, Cout, VoitureId, Description) 
                               VALUES (@date, @type, @km, @cout, @vid, 'Entretien périodique')";
@@ -98,11 +96,10 @@ namespace LocationVoiture.Admin
                         new MySqlParameter("@km", km), new MySqlParameter("@cout", cout), new MySqlParameter("@vid", voitureId)
                     };
 
-                    // On met à jour la voiture SEULEMENT si c'est un nouvel entretien
                     string queryUpdate = "UPDATE Voitures SET KmDernierEntretien = @km, KilometrageActuel = @km WHERE Id = @vid";
                     db.ExecuteNonQuery(queryUpdate, new MySqlParameter[] { new MySqlParameter("@km", km), new MySqlParameter("@vid", voitureId) });
                 }
-                else // UPDATE
+                else
                 {
                     query = @"UPDATE Entretiens SET DateEntretien=@date, TypeEntretien=@type, Kilometrage=@km, Cout=@cout, VoitureId=@vid 
                               WHERE Id=@id";
@@ -115,6 +112,7 @@ namespace LocationVoiture.Admin
 
                 db.ExecuteNonQuery(query, p);
                 MessageBox.Show("Enregistré !");
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex) { MessageBox.Show("Erreur : " + ex.Message); }

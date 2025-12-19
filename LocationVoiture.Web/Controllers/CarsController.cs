@@ -15,7 +15,6 @@ namespace LocationVoiture.Web.Controllers
             db = new DatabaseHelper();
         }
 
-        // Action INDEX avec paramètre 'brand' ajouté
         public IActionResult Index(string searchString, int? categoryId, string brand, int page = 1)
         {
             int pageSize = 6;
@@ -23,11 +22,9 @@ namespace LocationVoiture.Web.Controllers
 
             try
             {
-                // 1. Charger les catégories (Dropdown 1)
                 DataTable dtCats = db.ExecuteQuery("SELECT Id, Libelle FROM Categories");
                 ViewBag.Categories = dtCats;
 
-                // 2. Charger les Marques uniques (Dropdown 2 - NOUVEAU)
                 DataTable dtBrands = db.ExecuteQuery("SELECT DISTINCT Marque FROM Voitures ORDER BY Marque");
                 List<string> brandsList = new List<string>();
                 foreach (DataRow row in dtBrands.Rows)
@@ -36,43 +33,39 @@ namespace LocationVoiture.Web.Controllers
                 }
                 ViewBag.Brands = brandsList;
 
-                // Sauvegarde des filtres actuels pour la vue
                 ViewBag.CurrentCategory = categoryId;
                 ViewBag.CurrentSearch = searchString;
-                ViewBag.CurrentBrand = brand; // NOUVEAU
+                ViewBag.CurrentBrand = brand;
                 ViewBag.CurrentPage = page;
 
-                // 3. Construction de la requête SQL dynamique
                 string condition = "WHERE 1=1";
                 List<MySqlParameter> parameters = new List<MySqlParameter>();
 
-                // A. Recherche Texte
+                
                 if (!string.IsNullOrEmpty(searchString))
                 {
                     condition += " AND (v.Marque LIKE @search OR v.Modele LIKE @search)";
                     parameters.Add(new MySqlParameter("@search", "%" + searchString + "%"));
                 }
 
-                // B. Filtre Catégorie
+                
                 if (categoryId.HasValue && categoryId.Value > 0)
                 {
                     condition += " AND v.CategorieId = @catId";
                     parameters.Add(new MySqlParameter("@catId", categoryId.Value));
                 }
 
-                // C. Filtre Marque (NOUVEAU)
+                
                 if (!string.IsNullOrEmpty(brand))
                 {
                     condition += " AND v.Marque = @brand";
                     parameters.Add(new MySqlParameter("@brand", brand));
                 }
 
-                // 4. Compter le total
                 string countQuery = $"SELECT COUNT(*) FROM Voitures v {condition}";
                 object countRes = db.ExecuteScalar(countQuery, parameters.ToArray());
                 totalRecords = Convert.ToInt32(countRes);
 
-                // 5. Pagination
                 int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
                 ViewBag.TotalPages = totalPages;
 

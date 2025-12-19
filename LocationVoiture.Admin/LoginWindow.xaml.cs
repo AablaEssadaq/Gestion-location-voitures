@@ -2,7 +2,7 @@
 using LocationVoiture.Data;
 using System.Data;
 using MySql.Data.MySqlClient;
-using LocationVoiture.Admin.Utilities; // Pour PasswordHelper
+using LocationVoiture.Admin.Utilities; 
 
 namespace LocationVoiture.Admin
 {
@@ -15,8 +15,8 @@ namespace LocationVoiture.Admin
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            string username = txtUsername.Text;      // Ici c'est l'email ou le login
-            string password = txtPassword.Password;  // Le mot de passe en clair
+            string username = txtUsername.Text;      
+            string password = txtPassword.Password; 
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
@@ -24,7 +24,6 @@ namespace LocationVoiture.Admin
                 return;
             }
 
-            // On vérifie
             string role = VerifierEtRecupererRole(username, password);
 
             if (role != null)
@@ -42,15 +41,13 @@ namespace LocationVoiture.Admin
             Application.Current.Shutdown();
         }
 
-        // Nouvelle logique de vérification avec Hash
         private string VerifierEtRecupererRole(string user, string pass)
         {
             try
             {
                 DatabaseHelper db = new DatabaseHelper();
 
-                // 1. On cherche l'utilisateur par son Login/Email UNIQUEMENT
-                // (On ne met plus le mot de passe dans le WHERE)
+      
                 string query = "SELECT MotDePasse, Role FROM Utilisateurs WHERE Email = @user";
 
                 MySqlParameter[] paramsDb = new MySqlParameter[] {
@@ -65,14 +62,13 @@ namespace LocationVoiture.Admin
                     string storedHash = row["MotDePasse"].ToString();
                     string role = row["Role"].ToString();
 
-                    // 2. On compare le mot de passe saisi avec le hash stocké
                     if (PasswordHelper.VerifyPassword(pass, storedHash))
                     {
-                        return role; // C'est bon !
+                        return role; 
                     }
                 }
 
-                return null; // Pas trouvé ou mauvais mot de passe
+                return null; 
             }
             catch (System.Exception ex)
             {
