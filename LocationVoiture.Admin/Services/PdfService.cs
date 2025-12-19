@@ -9,18 +9,20 @@ namespace LocationVoiture.Admin.Services
 {
     public class PdfService
     {
+        private const string BaseUrl = "https://localhost:60000";
+
         public PdfService()
         {
-            // Licence communautaire gratuite requise pour QuestPDF
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
         public byte[] GenererBonReservation(int idLocation, string nomClient, string voiture, DateTime debut, DateTime fin, decimal prix)
         {
-            // 1. GÉNÉRER LE QR CODE
-            byte[] qrCodeImage = GenererQrCode($"LOC-{idLocation}-{nomClient}");
+            //GÉNÉRER L'URL POUR LE QR CODE
+            string urlScan = $"{BaseUrl}/Booking/Details/{idLocation}";
 
-            // 2. GÉNÉRER LE PDF
+            byte[] qrCodeImage = GenererQrCode(urlScan);
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>
@@ -30,22 +32,18 @@ namespace LocationVoiture.Admin.Services
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(12));
 
-                    // En-tête
                     page.Header()
                         .Text($"BON DE RÉSERVATION #{idLocation}")
                         .SemiBold().FontSize(24).FontColor(Colors.Blue.Medium);
 
-                    // Contenu
                     page.Content()
                         .PaddingVertical(1, Unit.Centimetre)
                         .Column(x =>
                         {
                             x.Spacing(20);
-
                             x.Item().Text($"Date d'émission : {DateTime.Now:dd/MM/yyyy}");
                             x.Item().Text($"Client : {nomClient}").Bold();
 
-                            // Tableau des détails
                             x.Item().Table(table =>
                             {
                                 table.ColumnsDefinition(columns =>
@@ -58,38 +56,32 @@ namespace LocationVoiture.Admin.Services
                                 {
                                     header.Cell().Element(CellStyle).Text("Désignation");
                                     header.Cell().Element(CellStyle).Text("Détail");
-
-                                    // CORRECTION ICI : Utilisation de DefaultTextStyle pour appliquer le style au texte
                                     static IContainer CellStyle(IContainer container) =>
-                                        container.BorderBottom(1).BorderColor("#E0E0E0").Padding(5).DefaultTextStyle(x => x.SemiBold());
+                                        container.BorderBottom(1).BorderColor("#E0E0E0").Padding(5).DefaultTextStyle(t => t.SemiBold());
                                 });
 
                                 table.Cell().Padding(5).Text("Véhicule");
                                 table.Cell().Padding(5).Text(voiture);
 
-                                table.Cell().Padding(5).Text("Date de début");
-                                table.Cell().Padding(5).Text(debut.ToString("dd/MM/yyyy"));
-
-                                table.Cell().Padding(5).Text("Date de fin");
-                                table.Cell().Padding(5).Text(fin.ToString("dd/MM/yyyy"));
+                                table.Cell().Padding(5).Text("Période");
+                                table.Cell().Padding(5).Text($"Du {debut:dd/MM} au {fin:dd/MM/yyyy}");
 
                                 table.Cell().Padding(5).Text("PRIX TOTAL");
                                 table.Cell().Padding(5).Text($"{prix} DH").Bold().FontColor(Colors.Green.Medium);
                             });
 
-                            // Affichage du QR Code
-                            x.Item().AlignRight().Element(c => c.Height(100).Width(100).Image(qrCodeImage));
-                            x.Item().AlignRight().Text("Scannez ce code à l'agence").FontSize(10).Italic();
+                            x.Item().AlignRight().Column(col =>
+                            {
+                                col.Item().Element(c => c.Height(100).Width(100).Image(qrCodeImage));
+                                col.Item().Text("Scanner pour voir en ligne").FontSize(9).Italic();
+                            });
                         });
 
-                    // Pied de page
-                    page.Footer()
-                        .AlignCenter()
-                        .Text(x =>
-                        {
-                            x.Span("Page ");
-                            x.CurrentPageNumber();
-                        });
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                    });
                 });
             });
 

@@ -3,6 +3,8 @@ using System.Data;
 using System.Windows;
 using LocationVoiture.Data;
 using MySql.Data.MySqlClient;
+using System.Security.Cryptography; 
+using System.Text; 
 
 namespace LocationVoiture.Admin
 {
@@ -25,6 +27,25 @@ namespace LocationVoiture.Admin
             }
         }
 
+        private string HasherMotDePasse(string password)
+        {
+            if (string.IsNullOrEmpty(password)) return "";
+
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                // Conversion de la chaîne en tableau d'octets
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                // Conversion du tableau d'octets en chaîne hexadécimale
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+        
         private void ChargerClient(int id)
         {
             try
@@ -54,16 +75,29 @@ namespace LocationVoiture.Admin
 
             try
             {
+                string mdpSaisi = txtMdp.Text;
+                string mdpFinal;
+
+
+                if (_idClient == null || !string.IsNullOrWhiteSpace(mdpSaisi))
+                {
+                    mdpFinal = HasherMotDePasse(mdpSaisi);
+                }
+                else
+                {
+                    mdpFinal = mdpSaisi;
+                }
+
                 string query;
                 MySqlParameter[] p = {
-                    new MySqlParameter("@nom", txtNom.Text),
-                    new MySqlParameter("@prenom", txtPrenom.Text),
-                    new MySqlParameter("@email", txtEmail.Text),
-                    new MySqlParameter("@tel", txtTel.Text),
-                    new MySqlParameter("@permis", txtPermis.Text),
-                    new MySqlParameter("@mdp", txtMdp.Text),
-                    new MySqlParameter("@id", _idClient)
-                };
+            new MySqlParameter("@nom", txtNom.Text),
+            new MySqlParameter("@prenom", txtPrenom.Text),
+            new MySqlParameter("@email", txtEmail.Text),
+            new MySqlParameter("@tel", txtTel.Text),
+            new MySqlParameter("@permis", txtPermis.Text),
+            new MySqlParameter("@mdp", mdpFinal), 
+            new MySqlParameter("@id", _idClient)
+        };
 
                 if (_idClient == null)
                 {
@@ -76,6 +110,8 @@ namespace LocationVoiture.Admin
 
                 db.ExecuteNonQuery(query, p);
                 MessageBox.Show("Enregistré avec succès !");
+
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex) { MessageBox.Show("Erreur : " + ex.Message); }

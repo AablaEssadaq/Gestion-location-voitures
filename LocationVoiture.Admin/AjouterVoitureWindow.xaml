@@ -15,11 +15,9 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- GAUCHE : FORMULAIRE -->
             <StackPanel Grid.Column="0" Margin="0,0,25,0">
                 <TextBlock Text="Fiche Véhicule" FontSize="24" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,20"/>
 
-                <!-- Marque / Modèle -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -36,7 +34,6 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Matricule / Catégorie -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -53,7 +50,6 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Carburant / KM -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -75,7 +71,6 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Prix / Disponibilité (NOUVEAU) -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -87,7 +82,6 @@
                         <TextBox x:Name="txtPrix" Height="35" VerticalContentAlignment="Center" Padding="5"/>
                     </StackPanel>
 
-                    <!-- CASE A COCHER DISPONIBLE -->
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                         <TextBlock Text="Statut" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,5"/>
                         <CheckBox x:Name="chkDisponible" Content="Disponible à la location" 
@@ -101,7 +95,6 @@
                 </StackPanel>
             </StackPanel>
 
-            <!-- DROITE : IMAGE -->
             <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="10,45,0,0">
                 <Border Width="260" Height="200" BorderBrush="#E5E7EB" BorderThickness="2" CornerRadius="8" Background="#F9FAFB" Margin="0,0,0,15">
                     <Image x:Name="imgApercu" Stretch="UniformToFill"/>

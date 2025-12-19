@@ -1,0 +1,71 @@
+﻿@using System.Data
+@model DataRow
+
+@{
+    ViewData["Title"] = "Détails de la réservation";
+    bool estPaye = Model["EstPaye"] != DBNull.Value && Convert.ToBoolean(Model["EstPaye"]);
+    string statut = Model["Statut"].ToString();
+    string couleurStatut = statut == "Confirmée" ? "success" : (statut == "Annulée" ? "danger" : "warning");
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header bg-primary text-white text-center py-4">
+            <h3 class="mb-0">🎫 Réservation #@Model["Id"]</h3>
+            <p class="mb-0 opacity-75">Bon de commande numérique</p>
+        </div>
+
+        <div class="card-body p-5">
+            <div class="row">
+                <div class="col-md-6 text-center mb-4">
+                    @if (!string.IsNullOrEmpty(Model["ImageChemin"].ToString()))
+                    {
+                        <img src="@Model["ImageChemin"]" class="img-fluid rounded shadow-sm mb-3" style="max-height: 250px;" alt="Voiture">
+                    }
+                    <h2 class="fw-bold text-dark">@Model["Marque"] @Model["Modele"]</h2>
+                    <span class="badge bg-secondary">@Model["Matricule"]</span>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="text-muted border-bottom pb-2">Informations</h5>
+
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="fw-bold">Client :</span>
+                        <span>@Model["Prenom"] @Model["Nom"]</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="fw-bold">Période :</span>
+                        <span>Du @Convert.ToDateTime(Model["DateDebut"]).ToString("dd/MM/yyyy") <br> au @Convert.ToDateTime(Model["DateFin"]).ToString("dd/MM/yyyy")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-2 mt-3">
+                        <span class="fw-bold fs-5">Total :</span>
+                        <span class="fs-4 text-primary fw-bold">@Model["PrixTotal"] DH</span>
+                    </div>
+
+                    <div class="mt-4">
+                        <span class="fw-bold">Statut :</span>
+                        <span class="badge bg-@couleurStatut fs-6 ms-2">@statut</span>
+                    </div>
+
+                    <div class="mt-2">
+                        <span class="fw-bold">Paiement :</span>
+                        @if (estPaye)
+                        {
+                            <span class="text-success fw-bold ms-2">✔ Payé</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger fw-bold ms-2">✘ Non réglé</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light text-center py-3">
+            <small class="text-muted">Ce document numérique est valable comme preuve de réservation.</small>
+        </div>
+    </div>
+</div>

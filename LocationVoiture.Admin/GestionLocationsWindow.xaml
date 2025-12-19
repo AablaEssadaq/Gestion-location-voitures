@@ -1,20 +1,99 @@
 ﻿<Window x:Class="LocationVoiture.Admin.GestionLocationsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Suivi des Locations" Height="600" Width="1100"
+        Title="Suivi des Locations et Paiements" Height="700" Width="1200"
         WindowStartupLocation="CenterScreen" Background="#F3F4F6">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Titre -->
-        <TextBlock Grid.Row="0" Text="Réservations en cours" FontSize="24" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,20"/>
+        <TextBlock Grid.Row="0" Text="Gestion des Réservations" FontSize="24" FontWeight="Bold" Foreground="#1F2937" Margin="0,0,0,15"/>
 
-        <!-- Liste des Locations -->
-        <DataGrid Grid.Row="1" x:Name="LocationsGrid" AutoGenerateColumns="False" 
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,15" BorderBrush="#E5E7EB" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="txtRecherche" Height="35" Padding="30,5,5,5" VerticalContentAlignment="Center"
+                             TextChanged="TxtRecherche_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                    <TextBlock Text="🔍 Client, Véhicule..." IsHitTestVisible="False" 
+                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=txtRecherche}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <ComboBox x:Name="cbFiltreStatut" Grid.Column="2" Height="35" SelectionChanged="CbFiltre_SelectionChanged" Background="#F9FAFB">
+                    <ComboBoxItem Content="Tous statuts" IsSelected="True"/>
+                    <ComboBoxItem Content="En Attente"/>
+                    <ComboBoxItem Content="Confirmée"/>
+                    <ComboBoxItem Content="Annulée"/>
+                    <ComboBoxItem Content="Terminée"/>
+                </ComboBox>
+
+                <ComboBox x:Name="cbFiltrePaiement" Grid.Column="4" Height="35" SelectionChanged="CbFiltre_SelectionChanged" Background="#F9FAFB">
+                    <ComboBoxItem Content="Tous paiements" Tag="-1" IsSelected="True"/>
+                    <ComboBoxItem Content="Payés" Tag="1"/>
+                    <ComboBoxItem Content="Non payés" Tag="0"/>
+                </ComboBox>
+
+                <ComboBox x:Name="cbTri" Grid.Column="6" Height="35" SelectionChanged="CbTri_SelectionChanged" Background="#F9FAFB">
+                    <ComboBoxItem Content="Plus récents" Tag="l.Id DESC" IsSelected="True"/>
+                    <ComboBoxItem Content="Plus anciens" Tag="l.Id ASC"/>
+                    <ComboBoxItem Content="Date début" Tag="l.DateDebut ASC"/>
+                    <ComboBoxItem Content="Prix décroissant" Tag="l.PrixTotal DESC"/>
+                </ComboBox>
+
+                <Button Grid.Column="8" Content="📥 Exporter" Click="BtnExporter_Click" Padding="10,0" Height="35" 
+                        Background="#059669" Foreground="White" BorderThickness="0" FontWeight="SemiBold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="10" Content="📤 Importer" Click="BtnImporter_Click" Padding="10,0" Height="35" 
+                        Background="#2563EB" Foreground="White" BorderThickness="0" FontWeight="SemiBold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="12" Content="Reset ↺" Click="BtnReset_Click" Padding="10,0" Height="35" 
+                        Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+            </Grid>
+        </Border>
+        <DataGrid Grid.Row="2" x:Name="LocationsGrid" AutoGenerateColumns="False" 
                   CanUserAddRows="False" IsReadOnly="True"
                   Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="45">
 
@@ -29,47 +108,38 @@
             </DataGrid.Resources>
 
             <DataGrid.Columns>
-                <!-- Infos Client -->
                 <DataGridTextColumn Header="Client" Binding="{Binding NomClient}" Width="*"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding EmailClient}" Width="1.5*"/>
-
-                <!-- Infos Voiture -->
                 <DataGridTextColumn Header="Véhicule" Binding="{Binding ModeleVoiture}" Width="*"/>
-
-                <!-- Dates & Prix -->
                 <DataGridTextColumn Header="Du" Binding="{Binding DateDebut, StringFormat=dd/MM/yyyy}" Width="90"/>
                 <DataGridTextColumn Header="Au" Binding="{Binding DateFin, StringFormat=dd/MM/yyyy}" Width="90"/>
-                <DataGridTextColumn Header="Total" Binding="{Binding PrixTotal, StringFormat={}{0} DH}" Width="80" FontWeight="Bold"/>
+                <DataGridTextColumn Header="Total" Binding="{Binding PrixTotal, StringFormat={}{0:N2} DH}" Width="90" FontWeight="Bold" Foreground="#059669"/>
 
-                <!-- Statut -->
                 <DataGridTextColumn Header="Statut" Binding="{Binding Statut}" Width="100" FontWeight="Bold"/>
+                <DataGridCheckBoxColumn Header="Payé ?" Binding="{Binding EstPaye}" Width="60"/>
 
-                <!-- Actions -->
-                <DataGridTemplateColumn Header="Gestion" Width="300">
+                <DataGridTemplateColumn Header="Actions" Width="320">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-
-                                <!-- BOUTON VOIR RECU -->
-                                <Button Content="📄 VOIR REÇU" Click="BtnVoirRecu_Click" 
-                        Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="Bold"
-                        FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"
-                        ToolTip="Ouvrir le bon de réservation PDF"/>
-
-                                <!-- Bouton Valider -->
-                                <Button Content="✅ Valider" Click="BtnValider_Click" 
-                        Background="#10B981" Foreground="White" BorderThickness="0" 
-                        FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding}"/>
-
-                                <!-- Bouton Refuser -->
-                                <Button Content="❌ Refuser" Click="BtnRefuser_Click" 
-                        Background="#EF4444" Foreground="White" BorderThickness="0" 
-                        FontSize="11" Padding="8,4" Cursor="Hand" Tag="{Binding}"/>
+                                <Button Content="💰 Encaisser" Click="BtnPayer_Click" Background="#F59E0B" Foreground="White" BorderThickness="0" FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"/>
+                                <Button Content="📄 Reçu" Click="BtnVoirRecu_Click" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"/>
+                                <Button Content="✅ Valider" Click="BtnValider_Click" Background="#10B981" Foreground="White" BorderThickness="0" FontSize="11" Padding="8,4" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding}"/>
+                                <Button Content="❌ Refuser" Click="BtnRefuser_Click" Background="#EF4444" Foreground="White" BorderThickness="0" FontSize="11" Padding="8,4" Cursor="Hand" Tag="{Binding}"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <Border Grid.Row="3" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock x:Name="lblPaginationInfo" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
+                    <Button x:Name="btnPrev" Content="Précédent" Click="BtnPrev_Click" Width="100" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                    <Button x:Name="btnNext" Content="Suivant" Click="BtnNext_Click" Width="100" Height="30" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

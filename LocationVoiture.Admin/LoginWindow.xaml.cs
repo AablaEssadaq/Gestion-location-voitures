@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using LocationVoiture.Data;
 using System.Data;
-// CORRECTION 1 : On utilise MySQL au lieu de SQL Server
 using MySql.Data.MySqlClient;
+using LocationVoiture.Admin.Utilities; 
 
 namespace LocationVoiture.Admin
 {
@@ -13,23 +13,22 @@ namespace LocationVoiture.Admin
             InitializeComponent();
         }
 
-        // Gestion du clic sur "Se Connecter"
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            string username = txtUsername.Text;
-            string password = txtPassword.Password;
+            string username = txtUsername.Text;      
+            string password = txtPassword.Password; 
 
-            // Validation simple des champs vides
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 ShowError("Veuillez remplir tous les champs.");
                 return;
             }
 
-            // --- VRAIE VERIFICATION BDD ---
-            if (VerifierBaseDeDonnees(username, password))
+            string role = VerifierEtRecupererRole(username, password);
+
+            if (role != null)
             {
-                OuvrirApplication();
+                OuvrirApplication(role);
             }
             else
             {
@@ -37,53 +36,55 @@ namespace LocationVoiture.Admin
             }
         }
 
-        // Gestion du clic sur "Quitter" ou la croix "X"
         private void BtnQuitter_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
 
-        // Méthode pour vérifier les identifiants en base
-        private bool VerifierBaseDeDonnees(string user, string pass)
+        private string VerifierEtRecupererRole(string user, string pass)
         {
             try
             {
                 DatabaseHelper db = new DatabaseHelper();
 
-                // Note : Assurez-vous que votre table s'appelle bien "Utilisateurs" (comme dans le script MySQL)
-                // et non "AdminUsers" (ancien script SQL Server).
-                string query = "SELECT COUNT(*) FROM Utilisateurs WHERE Email = @user AND MotDePasse = @pass AND Role = 'Admin'";
+      
+                string query = "SELECT MotDePasse, Role FROM Utilisateurs WHERE Email = @user";
 
-                // CORRECTION 2 : On utilise MySqlParameter
                 MySqlParameter[] paramsDb = new MySqlParameter[] {
-                    new MySqlParameter("@user", user),
-                    new MySqlParameter("@pass", pass)
+                    new MySqlParameter("@user", user)
                 };
 
-                DataTable result = db.ExecuteQuery(query, paramsDb);
+                DataTable dt = db.ExecuteQuery(query, paramsDb);
 
-                if (result.Rows.Count > 0 && Convert.ToInt32(result.Rows[0][0]) > 0)
+                if (dt.Rows.Count > 0)
                 {
-                    return true;
+                    DataRow row = dt.Rows[0];
+                    string storedHash = row["MotDePasse"].ToString();
+                    string role = row["Role"].ToString();
+
+                    if (PasswordHelper.VerifyPassword(pass, storedHash))
+                    {
+                        return role; 
+                    }
                 }
-                return false;
+
+                return null; 
             }
             catch (System.Exception ex)
             {
                 MessageBox.Show("Erreur BDD : " + ex.Message);
-                return false;
+                return null;
             }
         }
 
-        // Transition vers la fenêtre principale
-        private void OuvrirApplication()
+        private void OuvrirApplication(string role)
         {
-            MainWindow main = new MainWindow();
-            main.Show();
+            App.CurrentRole = role;
+            DashboardWindow dash = new DashboardWindow();
+            dash.Show();
             this.Close();
         }
 
-        // Affichage des erreurs sous le bouton
         private void ShowError(string message)
         {
             lblError.Text = message;

@@ -1,43 +1,35 @@
 ﻿using System;
-using System.Data; // Pour DataTable
+using System.Data;
 using System.Windows;
 using LocationVoiture.Data;
 using MySql.Data.MySqlClient;
+using LocationVoiture.Admin.Utilities;
 
 namespace LocationVoiture.Admin
 {
     public partial class AjouterUtilisateurWindow : Window
     {
         private DatabaseHelper db;
-        private int? _userIdToEdit = null; // Stocke l'ID si on est en modification
+        private int? _userIdToEdit = null;
 
-        // Constructeur par défaut (Ajout)
-        public AjouterUtilisateurWindow()
+        public AjouterUtilisateurWindow(int? userId = null)
         {
             InitializeComponent();
             db = new DatabaseHelper();
-            this.Title = "Nouvel Employé";
-        }
 
-        // Constructeur pour la modification (On passe l'ID)
-        public AjouterUtilisateurWindow(int userId)
-        {
-            InitializeComponent();
-            db = new DatabaseHelper();
-            _userIdToEdit = userId;
-            this.Title = "Modifier l'Employé";
-
-            // On change le texte du bouton (optionnel si vous avez donné un nom au bouton en XAML)
-            // btnEnregistrer.Content = "Modifier"; 
-
-            ChargerDonneesUtilisateur(userId);
+            if (userId.HasValue)
+            {
+                _userIdToEdit = userId;
+                this.Title = "Modifier l'Employé";
+                ChargerDonneesUtilisateur(userId.Value);
+            }
         }
 
         private void ChargerDonneesUtilisateur(int id)
         {
             try
             {
-                string query = "SELECT Nom, Prenom, Email, MotDePasse, Role FROM Utilisateurs WHERE Id = @id";
+                string query = "SELECT Nom, Prenom, Email, Role FROM Utilisateurs WHERE Id = @id";
                 MySqlParameter[] param = { new MySqlParameter("@id", id) };
 
                 DataTable dt = db.ExecuteQuery(query, param);
@@ -48,8 +40,9 @@ namespace LocationVoiture.Admin
                     txtNom.Text = row["Nom"].ToString();
                     txtPrenom.Text = row["Prenom"].ToString();
                     txtEmail.Text = row["Email"].ToString();
-                    txtMdp.Text = row["MotDePasse"].ToString(); // Affiche le mot de passe actuel
                     cbRole.Text = row["Role"].ToString();
+
+                    txtMdp.Password = "";
                 }
             }
             catch (Exception ex)
@@ -60,46 +53,56 @@ namespace LocationVoiture.Admin
 
         private void BtnEnregistrer_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNom.Text) || string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtMdp.Text))
+            if (string.IsNullOrWhiteSpace(txtNom.Text) || string.IsNullOrWhiteSpace(txtEmail.Text))
             {
-                MessageBox.Show("Merci de remplir tous les champs.");
+                MessageBox.Show("Merci de remplir Nom et Email.");
+                return;
+            }
+
+            if (_userIdToEdit == null && string.IsNullOrWhiteSpace(txtMdp.Password))
+            {
+                MessageBox.Show("Le mot de passe est obligatoire pour un nouvel utilisateur.");
                 return;
             }
 
             try
             {
                 string query;
-                MySqlParameter[] param;
+                System.Collections.Generic.List<MySqlParameter> p = new System.Collections.Generic.List<MySqlParameter>
+                {
+                    new MySqlParameter("@nom", txtNom.Text),
+                    new MySqlParameter("@prenom", txtPrenom.Text),
+                    new MySqlParameter("@email", txtEmail.Text),
+                    new MySqlParameter("@role", cbRole.Text)
+                };
 
                 if (_userIdToEdit == null)
                 {
-                    // === CAS 1 : AJOUT (INSERT) ===
+                    string mdpHache = PasswordHelper.HashPassword(txtMdp.Password);
+
                     query = "INSERT INTO Utilisateurs (Nom, Prenom, Email, MotDePasse, Role) VALUES (@nom, @prenom, @email, @mdp, @role)";
-                    param = new MySqlParameter[] {
-                        new MySqlParameter("@nom", txtNom.Text),
-                        new MySqlParameter("@prenom", txtPrenom.Text),
-                        new MySqlParameter("@email", txtEmail.Text),
-                        new MySqlParameter("@mdp", txtMdp.Text),
-                        new MySqlParameter("@role", cbRole.Text)
-                    };
+                    p.Add(new MySqlParameter("@mdp", mdpHache));
                 }
                 else
                 {
-                    // === CAS 2 : MODIFICATION (UPDATE) ===
-                    query = "UPDATE Utilisateurs SET Nom=@nom, Prenom=@prenom, Email=@email, MotDePasse=@mdp, Role=@role WHERE Id=@id";
-                    param = new MySqlParameter[] {
-                        new MySqlParameter("@nom", txtNom.Text),
-                        new MySqlParameter("@prenom", txtPrenom.Text),
-                        new MySqlParameter("@email", txtEmail.Text),
-                        new MySqlParameter("@mdp", txtMdp.Text),
-                        new MySqlParameter("@role", cbRole.Text),
-                        new MySqlParameter("@id", _userIdToEdit)
-                    };
+                    p.Add(new MySqlParameter("@id", _userIdToEdit));
+
+                    if (string.IsNullOrWhiteSpace(txtMdp.Password))
+                    {
+                        query = "UPDATE Utilisateurs SET Nom=@nom, Prenom=@prenom, Email=@email, Role=@role WHERE Id=@id";
+                    }
+                    else
+                    {
+                        string mdpHache = PasswordHelper.HashPassword(txtMdp.Password);
+                        p.Add(new MySqlParameter("@mdp", mdpHache));
+                        query = "UPDATE Utilisateurs SET Nom=@nom, Prenom=@prenom, Email=@email, Role=@role, MotDePasse=@mdp WHERE Id=@id";
+                    }
                 }
 
-                db.ExecuteNonQuery(query, param);
+                db.ExecuteNonQuery(query, p.ToArray());
 
-                MessageBox.Show(_userIdToEdit == null ? "Utilisateur créé !" : "Utilisateur modifié !");
+                MessageBox.Show("Utilisateur enregistré avec succès !");
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex)

@@ -1,51 +1,118 @@
 ﻿<Window x:Class="LocationVoiture.Admin.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gestion Location - Accueil" Height="650" Width="1100"
+        Title="Gestion du Parc Automobile" Height="750" Width="1250"
         WindowStartupLocation="CenterScreen" Background="#F0F2F5">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- === BARRE D'OUTILS === -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,20">
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="🚘 Liste des Véhicules" FontSize="24" FontWeight="Bold" Foreground="#1F2937"/>
+                <TextBlock Text=" | Gestion de la flotte" FontSize="16" Foreground="#6B7280" VerticalAlignment="Bottom" Margin="10,0,0,3"/>
+            </StackPanel>
 
-            <!-- Bouton CLIENTS (NOUVEAU) -->
-            <Button Content="👤 Gérer les Clients" Click="BtnClients_Click"
-                    Height="40" Width="160" Margin="0,0,10,0"
-                    Background="White" Foreground="#4B5563" FontWeight="Bold" BorderBrush="#E5E7EB" BorderThickness="1" Cursor="Hand"/>
-
-            <!-- Bouton EMPLOYES -->
-            <Button Content="🛡️ Gérer les Employés" Click="BtnUsers_Click"
-                    Height="40" Width="170" Margin="0,0,10,0"
-                    Background="White" Foreground="#4B5563" FontWeight="Bold" BorderBrush="#E5E7EB" BorderThickness="1" Cursor="Hand"/>
-
-            <!-- Bouton VOITURES -->
-            <Button Content="+ AJOUTER VOITURE" Click="BtnAjouter_Click"
-                    Height="40" Width="180"
-                    Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+            <Button HorizontalAlignment="Right" Content="+ NOUVEAU VÉHICULE" Click="BtnAjouter_Click"
+                    Height="40" Padding="20,0" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
                 <Button.Resources>
                     <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="CornerRadius" Value="6"/>
                     </Style>
                 </Button.Resources>
             </Button>
+        </Grid>
 
-            <Button Content="📅 Gérer Locations" Click="BtnLocations_Click"
-        Height="40" Width="160" Margin="0,0,10,0"
-        Background="White" Foreground="#4B5563" FontWeight="Bold" BorderBrush="#E5E7EB" BorderThickness="1" Cursor="Hand"/>
-        
-        </StackPanel>
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,15" BorderBrush="#E5E7EB" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- === LISTE DES VOITURES === -->
-        <DataGrid Grid.Row="1" x:Name="MyDataGrid" 
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="txtRecherche" Height="35" Padding="30,5,5,5" VerticalContentAlignment="Center"
+                             TextChanged="TxtRecherche_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                    <TextBlock Text="🔍 Marque, Modèle, Matricule..." IsHitTestVisible="False" 
+                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=txtRecherche}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <ComboBox x:Name="cbFiltreCategorie" Grid.Column="2" Height="35" 
+                          SelectionChanged="CbFiltre_SelectionChanged" DisplayMemberPath="Libelle" SelectedValuePath="Id"
+                          Background="#F9FAFB"/>
+
+                <ComboBox x:Name="cbTri" Grid.Column="4" Height="35" SelectionChanged="CbTri_SelectionChanged" Background="#F9FAFB">
+                    <ComboBoxItem Content="Derniers ajouts" Tag="v.Id DESC" IsSelected="True"/>
+                    <ComboBoxItem Content="Prix croissant" Tag="v.PrixParJour ASC"/>
+                    <ComboBoxItem Content="Prix décroissant" Tag="v.PrixParJour DESC"/>
+                    <ComboBoxItem Content="KM croissant" Tag="v.KilometrageActuel ASC"/>
+                    <ComboBoxItem Content="KM décroissant" Tag="v.KilometrageActuel DESC"/>
+                </ComboBox>
+
+                <Button Grid.Column="6" Content="📥 Exporter" Click="BtnExporter_Click" Width="90" Height="35" 
+                        Background="#059669" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="8" Content="📤 Importer" Click="BtnImporter_Click" Width="90" Height="35" 
+                        Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button Grid.Column="10" Content="↺ Reset" Click="BtnReset_Click" 
+                        Padding="10,0" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+        </Border>
+
+        <DataGrid Grid.Row="2" x:Name="MyDataGrid" 
                   AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
-                  Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
+                  Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="45">
 
             <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#E0E7FF"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#1F2937"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#F3F4F6"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#1F2937"/>
+
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Padding" Value="10"/>
                     <Setter Property="Background" Value="#F9FAFB"/>
@@ -56,30 +123,45 @@
             </DataGrid.Resources>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Matricule" Binding="{Binding Matricule}" Width="100"/>
-                <DataGridTextColumn Header="Marque" Binding="{Binding Marque}" Width="*"/>
+                <DataGridTextColumn Header="Matricule" Binding="{Binding Matricule}" Width="100" FontWeight="SemiBold"/>
+                <DataGridTextColumn Header="Véhicule" Binding="{Binding Marque}" Width="*"/>
                 <DataGridTextColumn Header="Modèle" Binding="{Binding Modele}" Width="*"/>
                 <DataGridTextColumn Header="Catégorie" Binding="{Binding Categorie}" Width="*"/>
-                <DataGridTextColumn Header="Prix/J" Binding="{Binding PrixParJour, StringFormat={}{0} DH}" Width="80"/>
-                <DataGridTextColumn Header="KM Actuel" Binding="{Binding KilometrageActuel, StringFormat={}{0} km}" Width="90"/>
+                <DataGridTextColumn Header="Prix/J" Binding="{Binding PrixParJour, StringFormat={}{0:N2} DH}" Width="100" FontWeight="Bold" Foreground="#059669"/>
 
-                <DataGridCheckBoxColumn Header="Dispo." Binding="{Binding EstDisponible}" Width="50"/>
+                <DataGridTextColumn Header="KM Actuel" Binding="{Binding KilometrageActuel, StringFormat={}{0:N0} km}" Width="110">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="{Binding CouleurAlerte}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
 
-                <DataGridTemplateColumn Header="Actions" Width="160">
+                <DataGridCheckBoxColumn Header="Dispo." Binding="{Binding EstDisponible}" Width="60"/>
+                <DataGridTemplateColumn Header="Actions" Width="130">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="Modifier" Click="BtnModifier_Click" 
-                                        Background="#DBEAFE" Foreground="#1E40AF" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding Id}"/>
-                                <Button Content="Supprimer" Click="BtnSupprimer_Click" 
-                                        Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" 
-                                        FontSize="11" Padding="8,0" Cursor="Hand" Tag="{Binding Id}"/>
+                                <Button Content="✏️" Click="BtnModifier_Click" Background="#DBEAFE" Foreground="#1E40AF" BorderThickness="0" Padding="8,4" Margin="0,0,5,0" Tag="{Binding Id}"/>
+                                <Button Content="🗑️" Click="BtnSupprimer_Click" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="8,4" Tag="{Binding Id}"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <Border Grid.Row="3" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock x:Name="lblPaginationInfo" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
+                <Button x:Name="btnPrev" Content="◀ Précédent" Click="BtnPrev_Click" Width="110" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB"/>
+                <Button x:Name="btnNext" Content="Suivant ▶" Click="BtnNext_Click" Width="110" Height="30" Background="White" BorderBrush="#D1D5DB"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

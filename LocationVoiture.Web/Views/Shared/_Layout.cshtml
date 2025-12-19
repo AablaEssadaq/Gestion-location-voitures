@@ -7,53 +7,251 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Location Voiture</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LocationVoiture.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffffff !important;
+            font-size: 1.4rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 0 10px;
+        }
+
+            .nav-link:not(.nav-link-login):not(.btn-auth)::after {
+                content: '';
+                position: absolute;
+                width: 0;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+                background-color: #ffffff;
+                transition: width 0.3s;
+            }
+
+            .nav-link:not(.nav-link-login):not(.btn-auth):hover::after {
+                width: 100%;
+            }
+
+            .nav-link:hover {
+                color: #ffffff !important;
+                transform: translateY(-2px);
+            }
+
+        .btn-auth {
+            background-color: #ffffff;
+            color: #1e3a8a !important;
+            font-weight: 600;
+            border-radius: 50px;
+            padding: 10px 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            display: inline-flex;
+            align-items: center;
+        }
+
+            .btn-auth:hover, .btn-auth:focus {
+                background-color: transparent !important;
+                color: #ffffff !important;
+                border-color: #ffffff !important;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            }
+
+        .nav-link-login {
+            color: white !important;
+            font-weight: 600;
+            margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50px;
+            padding: 8px 20px !important;
+            transition: all 0.3s;
+        }
+
+            .nav-link-login::after {
+                display: none !important;
+                content: none !important;
+            }
+
+            .nav-link-login:hover {
+                background-color: rgba(255,255,255,0.1);
+                border-color: white;
+                transform: translateY(-2px);
+            }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+            .dropdown-item:hover {
+                background-color: #eff6ff;
+                color: #1e3a8a;
+                transform: translateX(5px);
+            }
+
+        .dropdown-divider {
+            margin: 8px 0;
+        }
+
+        footer {
+            background-color: #ffffff;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .fade-in {
+            animation: fadeInPage 0.5s ease-in-out;
+        }
+
+        @@keyframes fadeInPage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .transition-icon:hover i {
+            color: #1e3a8a;
+            transform: scale(1.2);
+            display: inline-block;
+            transition: all 0.3s;
+        }
+    </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">🚗 Location Voiture</a>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-3 py-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-car-front-fill me-2 fs-3"></i>
+                    <span>Location Voitures</span>
+                </a>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center">
+                    <ul class="navbar-nav flex-grow-1 ms-lg-5">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Accueil</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i> Accueil
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Cars" asp-action="Index">Nos Voitures</a>
+                            <a class="nav-link" asp-controller="Cars" asp-action="Index">
+                                <i class="bi bi-collection me-1"></i> Nos Véhicules
+                            </a>
                         </li>
                     </ul>
 
-                    <!-- GESTION DE LA CONNEXION (DROITE) -->
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-center mt-3 mt-lg-0">
                         @{
-                            // On regarde si une session existe
                             var clientNom = HttpContextAccessor.HttpContext.Session.GetString("ClientNom");
                         }
 
                         @if (!string.IsNullOrEmpty(clientNom))
                         {
-                            // SI CONNECTÉ
-                            <li class="nav-item">
-                                <span class="nav-link text-success fw-bold">Bonjour, @clientNom</span>
+                            <li class="nav-item me-3">
+                                <a class="nav-link" asp-controller="ClientSpace" asp-action="Index">
+                                    <i class="bi bi-calendar-check me-1"></i> Mes Réservations
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-controller="Account" asp-action="Logout">Se déconnecter</a>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle btn-auth d-flex align-items-center text-primary" href="#" role="button" data-bs-toggle="dropdown" style="background: white; border:none;">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <span>@clientNom</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ClientSpace" asp-action="Profile">
+                                            <i class="bi bi-person-badge me-2 text-primary"></i>Mon Profil
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Se déconnecter
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
                         {
-                            // SI PAS CONNECTÉ
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Se connecter</a>
+                            <li class="nav-item mb-2 mb-lg-0">
+                                <a class="nav-link nav-link-login" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                                    <span>Se connecter</span>
+                                </a>
                             </li>
-                            <li class="nav-item ms-2">
-                                <a class="btn btn-primary text-white" asp-controller="Account" asp-action="Register">S'inscrire</a>
+                            <li class="nav-item">
+                                <a class="btn-auth" asp-controller="Account" asp-action="Register">
+                                    <i class="bi bi-person-plus-fill me-2"></i>
+                                    <span>S'inscrire</span>
+                                </a>
                             </li>
                         }
                     </ul>
@@ -62,15 +260,26 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container flex-grow-1 py-4">
+        <main role="main" class="pb-3 fade-in">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-auto py-3">
-        <div class="container text-center">
-            &copy; 2025 - Location Voiture - Projet Étudiant
+    <footer class="bg-white border-top footer text-muted mt-auto py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="mb-0">&copy; 2025 - <strong>Location Voitures</strong> - Votre partenaire de route.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="social-links">
+                        <a href="#" class="text-decoration-none text-muted me-3 transition-icon"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="text-decoration-none text-muted me-3 transition-icon"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#" class="text-decoration-none text-muted transition-icon"><i class="bi bi-twitter fs-5"></i></a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 

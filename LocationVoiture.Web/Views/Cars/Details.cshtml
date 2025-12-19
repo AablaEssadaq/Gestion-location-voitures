@@ -9,7 +9,6 @@
     <a asp-action="Index" class="btn btn-link text-decoration-none mb-3">← Retour au catalogue</a>
 
     <div class="row bg-white shadow-sm rounded overflow-hidden">
-        <!-- Colonne Image -->
         <div class="col-md-7 p-0 bg-light d-flex align-items-center justify-content-center" style="min-height: 400px;">
             @if (!string.IsNullOrEmpty(Model["ImageChemin"].ToString()))
             {
@@ -21,7 +20,6 @@
             }
         </div>
 
-        <!-- Colonne Infos -->
         <div class="col-md-5 p-5 d-flex flex-column justify-content-center">
             <span class="text-uppercase text-muted fw-bold small tracking-wide">@Model["Categorie"] • @Model["Carburant"]</span>
 
@@ -41,7 +39,6 @@
                 <li class="mb-2">🛣️ <strong>Kilométrage :</strong> @Model["KilometrageActuel"] km</li>
             </ul>
 
-            <!-- Formulaire de Réservation -->
             @if (Context.Session.GetString("ClientId") != null)
             {
                 <form asp-controller="Booking" asp-action="Book" method="get">

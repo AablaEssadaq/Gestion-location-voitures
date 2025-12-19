@@ -1,0 +1,73 @@
+﻿@using System.Data
+@model DataRow
+
+@{
+    ViewData["Title"] = "Mon Profil";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success text-center mb-4">@TempData["Success"]</div>
+            }
+
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i>Mon Profil</h3>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="avatar-circle bg-light text-primary mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm">
+                            <span class="display-4 fw-bold">@Model["Prenom"].ToString().Substring(0, 1)@Model["Nom"].ToString().Substring(0, 1)</span>
+                        </div>
+                        <h2 class="fw-bold text-dark">@Model["Prenom"] @Model["Nom"]</h2>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded bg-light h-100 border">
+                                <label class="text-muted small text-uppercase fw-bold mb-1">Email</label>
+                                <p class="mb-0 fw-bold text-dark fs-5 text-break">@Model["Email"]</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded bg-light h-100 border">
+                                <label class="text-muted small text-uppercase fw-bold mb-1">Téléphone</label>
+                                <p class="mb-0 fw-bold text-dark fs-5">@Model["Telephone"]</p>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-3 rounded bg-light h-100 border">
+                                <label class="text-muted small text-uppercase fw-bold mb-1">Numéro de Permis</label>
+                                <p class="mb-0 fw-bold text-dark fs-5">@Model["NumPermis"]</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-5">
+                        <a asp-action="EditProfile" class="btn btn-primary btn-lg px-4 fw-bold text-white">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier mes infos
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-primary btn-lg px-4 fw-bold">
+                            <i class="bi bi-list-check me-2"></i>Voir mes réservations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+</style>

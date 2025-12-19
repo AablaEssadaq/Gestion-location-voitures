@@ -1,0 +1,220 @@
+﻿<Window x:Class="LocationVoiture.Admin.GestionEntretiensWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestion des Entretiens" Height="700" Width="1100"
+        WindowStartupLocation="CenterScreen" Background="#F3F4F6">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="🔧 Maintenance &amp; Suivi" FontSize="24" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="⚙️ Types" Click="BtnConfig_Click" Height="40" Width="100" Margin="0,0,10,0" Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Cursor="Hand"/>
+                <Button Content="+ Nouvel Entretien" Click="BtnAjouter_Click" Height="40" Width="160" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent" SelectionChanged="TabControl_SelectionChanged">
+
+            <TabItem Header="⚠️ Alertes Maintenance" FontSize="14" FontWeight="SemiBold">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,10" BorderBrush="#E5E7EB" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <TextBox x:Name="txtRechercheAlertes" Height="35" Padding="5" VerticalContentAlignment="Center"
+                                             TextChanged="TxtRechercheAlertes_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                                <TextBlock Text="🔍 Véhicule, Matricule..." IsHitTestVisible="False" 
+                                               Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=txtRechercheAlertes}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <ComboBox x:Name="cbFiltreTypeAlerte" Grid.Column="2" Height="35" Background="#F9FAFB"
+                                            SelectionChanged="CbFiltreTypeAlerte_SelectionChanged">
+                            </ComboBox>
+
+                            <Button Grid.Column="4" Content="↺" Click="BtnResetAlertes_Click" 
+                                        Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563"/>
+                        </Grid>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" x:Name="AlertesGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                              Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Véhicule" Binding="{Binding Vehicule}" Width="*"/>
+                            <DataGridTextColumn Header="Matricule" Binding="{Binding Matricule}" Width="120"/>
+                            <DataGridTextColumn Header="À faire" Binding="{Binding NomProchainEntretien}" Width="150" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="KM Actuel" Binding="{Binding KilometrageActuel}" Width="100"/>
+                            <DataGridTextColumn Header="Dernier Fait" Binding="{Binding KmDernierEntretien}" Width="100"/>
+
+                            <DataGridTemplateColumn Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Faire Entretien" Click="BtnFaireEntretien_Click" Background="#F59E0B" Foreground="White" BorderThickness="0" Padding="10,5" Cursor="Hand" Tag="{Binding Id}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Row="2" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock x:Name="lblPaginationInfoAlertes" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
+                            <Button x:Name="btnPrevAlertes" Content=" Précédent" Click="BtnPrevAlertes_Click" Width="100" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                            <Button x:Name="btnNextAlertes" Content="Suivant" Click="BtnNextAlertes_Click" Width="100" Height="30" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="📜 Historique Complet" FontSize="14" FontWeight="SemiBold">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="10" Margin="0,0,0,10" BorderBrush="#E5E7EB" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <TextBox x:Name="txtRechercheHist" Height="35" Padding="5" VerticalContentAlignment="Center"
+                                         TextChanged="TxtRechercheHist_TextChanged" Background="#F9FAFB" BorderBrush="#D1D5DB"/>
+                                <TextBlock Text="🔍 Véhicule, Matricule..." IsHitTestVisible="False" 
+                                           Foreground="#9CA3AF" VerticalAlignment="Center" Margin="10,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=txtRechercheHist}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <ComboBox x:Name="cbFiltreTypeHist" Grid.Column="2" Height="35" Background="#F9FAFB"
+                                      SelectionChanged="CbFiltreTypeHist_SelectionChanged">
+                            </ComboBox>
+
+                            <ComboBox x:Name="cbTriHist" Grid.Column="4" Height="35" Background="#F9FAFB" SelectionChanged="CbTriHist_SelectionChanged">
+                                <ComboBoxItem Content="Plus récents" Tag="e.DateEntretien DESC" IsSelected="True"/>
+                                <ComboBoxItem Content="Plus anciens" Tag="e.DateEntretien ASC"/>
+                                <ComboBoxItem Content="Coût croissant" Tag="e.Cout ASC"/>
+                                <ComboBoxItem Content="Coût décroissant" Tag="e.Cout DESC"/>
+                            </ComboBox>
+
+                            <Button Grid.Column="6" Content="📥 Exporter" Click="BtnExporterHist_Click" Width="90" Height="35" 
+                                    Background="#059669" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+
+                            <Button Grid.Column="8" Content="📤 Importer" Click="BtnImporterHist_Click" Width="90" Height="35" 
+                                    Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+
+                            <Button Grid.Column="10" Content="↺" Click="BtnResetHist_Click" 
+                                    Width="40" Height="35" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" Foreground="#4B5563">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <DataGrid Grid.Row="1" x:Name="HistoriqueGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                              Background="White" BorderBrush="#E5E7EB" BorderThickness="1" RowHeight="40">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding DateEntretien, StringFormat=dd/MM/yyyy}" Width="100"/>
+                            <DataGridTextColumn Header="Véhicule" Binding="{Binding Vehicule}" Width="*"/>
+                            <DataGridTextColumn Header="Matricule" Binding="{Binding Matricule}" Width="120"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding TypeEntretien}" Width="150"/>
+                            <DataGridTextColumn Header="KM" Binding="{Binding Kilometrage}" Width="100"/>
+                            <DataGridTextColumn Header="Coût" Binding="{Binding Cout, StringFormat={}{0:N2} DH}" Width="100" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="1.5*"/>
+
+                            <DataGridTemplateColumn Header="Actions" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Button Content="✏️" Click="BtnModifierHist_Click" Background="#DBEAFE" Foreground="#1E40AF" BorderThickness="0" Padding="5" Margin="0,0,5,0" Cursor="Hand" Tag="{Binding IdEntretien}" ToolTip="Modifier"/>
+                                            <Button Content="🗑️" Click="BtnSupprimerHist_Click" Background="#FEE2E2" Foreground="#DC2626" BorderThickness="0" Padding="5" Cursor="Hand" Tag="{Binding IdEntretien}" ToolTip="Supprimer"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Row="2" Background="White" CornerRadius="0,0,8,8" Padding="10" BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" Margin="0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock x:Name="lblPaginationInfoHist" Text="Page 1 sur 1" VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray"/>
+                            <Button x:Name="btnPrevHist" Content=" Précédent" Click="BtnPrevHist_Click" Width="100" Height="30" Margin="0,0,10,0" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                            <Button x:Name="btnNextHist" Content="Suivant " Click="BtnNextHist_Click" Width="100" Height="30" Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

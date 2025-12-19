@@ -3,12 +3,10 @@ using System.Collections.Generic;
 
 namespace LocationVoiture.Data
 {
-    // --- ENUMERATIONS ---
     public enum RoleUtilisateur { Admin, Employe }
     public enum StatutLocation { EnCours, Terminee, Annulee }
     public enum MethodePaiement { CarteBancaire, Espece, Virement }
 
-    // --- CLASSES ---
 
     public class Utilisateur
     {
@@ -17,8 +15,7 @@ namespace LocationVoiture.Data
         public string Prenom { get; set; }
         public string Email { get; set; }
         public string MotDePasse { get; set; }
-        // Note: Dans la BDD MySQL, le role est stocké en VARCHAR ('Admin'), 
-        // il faudra gérer la conversion string <-> enum dans le code si besoin.
+
         public string Role { get; set; }
     }
 
@@ -51,7 +48,6 @@ namespace LocationVoiture.Data
         public bool EstDisponible { get; set; }
         public int CategorieId { get; set; }
 
-        // Entretien
         public int KilometrageActuel { get; set; }
         public int KmDernierEntretien { get; set; }
         public DateTime? DateProchainEntretien { get; set; }
@@ -63,17 +59,23 @@ namespace LocationVoiture.Data
         public DateTime DateDebut { get; set; }
         public DateTime DateFin { get; set; }
         public decimal PrixTotal { get; set; }
-        public string Statut { get; set; } // Changé en string pour correspondre facilement à la BDD
+        public string Statut { get; set; }
+
+        
+        public bool EstPaye { get; set; }
+        
+
         public int ClientId { get; set; }
         public int VoitureId { get; set; }
     }
+
 
     public class Paiement
     {
         public int Id { get; set; }
         public decimal Montant { get; set; }
         public DateTime DatePaiement { get; set; }
-        public string Methode { get; set; } // Changé en string
+        public string Methode { get; set; } 
         public int LocationId { get; set; }
     }
 
