@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LocationVoiture.Admin.GestionEntretiensWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gestion des Entretiens" Height="700" Width="1100"
+        Title="Gestion des Entretiens" Height="680" Width="1100"
         WindowStartupLocation="CenterScreen" Background="#F3F4F6">
 
     <Grid Margin="20">
